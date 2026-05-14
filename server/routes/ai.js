@@ -1,5 +1,11 @@
+// Apply pass 5 — adds the following routes to the existing router:
+//   GET  /api/ai/usage-analytics              (DB aggregation, no AI)
+//   POST /api/ai/brand-consistency            (AI; PRODUCT-DECISION: prompt-based)
+// Required env vars (already used by existing endpoints): OPENROUTER_API_KEY,
+// OPENROUTER_MODEL.
 const express = require('express');
 const authenticate = require('../middleware/auth');
+const { VideoGeneration, ImageGeneration, Voiceover, Storyboard } = require('../models');
 
 const router = express.Router();
 
@@ -359,6 +365,220 @@ Provide the response with these sections:
 
     const result = await callOpenRouter(aiPrompt);
     res.json({ success: true, type: 'motion-tracker', result });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Auto Subtitle Generator
+router.post('/auto-subtitle-generator', authenticate, async (req, res) => {
+  try {
+    const { transcript, language, style } = req.body;
+    if (!transcript) return res.status(400).json({ error: 'Transcript text is required' });
+
+    const aiPrompt = `You are a subtitle/caption editor. Convert the following transcript into properly timed, broadcast-quality subtitles.
+
+Transcript: "${transcript}"
+Target Language: ${language || 'English'}
+Style: ${style || 'standard, accessibility-friendly'}
+
+Provide the response with these sections:
+## Subtitle Cues
+## Timing Notes
+## Reading Speed Adjustments
+## Accessibility Tips
+## Translation/Localization Notes`;
+
+    const result = await callOpenRouter(aiPrompt);
+    res.json({ success: true, type: 'auto-subtitle-generator', result });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Music Recommendation
+router.post('/music-recommendation', authenticate, async (req, res) => {
+  try {
+    const { sceneDescription, mood, durationSeconds, license } = req.body;
+    if (!sceneDescription) return res.status(400).json({ error: 'Scene description is required' });
+
+    const aiPrompt = `You are a music supervisor. Recommend soundtrack directions for the following video scene.
+
+Scene Description: "${sceneDescription}"
+Desired Mood: ${mood || 'unspecified'}
+Duration (seconds): ${durationSeconds || 'unspecified'}
+License Requirements: ${license || 'royalty-free / commercial use'}
+
+Provide the response with these sections:
+## Recommended Genres
+## Tempo & Key Suggestions
+## Reference Tracks (search terms)
+## Sound Design / SFX Notes
+## License & Rights Notes`;
+
+    const result = await callOpenRouter(aiPrompt);
+    res.json({ success: true, type: 'music-recommendation', result });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Scene Transition Suggester
+router.post('/scene-transition-suggester', authenticate, async (req, res) => {
+  try {
+    const { scenes, projectStyle } = req.body;
+    if (!Array.isArray(scenes) || scenes.length < 2) {
+      return res.status(400).json({ error: 'scenes (array of at least 2 scene descriptions) is required' });
+    }
+
+    const aiPrompt = `You are a film editor. Recommend transitions between consecutive scenes that improve pacing and emotional flow.
+
+Project Style: ${projectStyle || 'modern, cinematic'}
+Scenes:\n${scenes.map((s, i) => `${i + 1}. ${s}`).join('\n')}
+
+Provide the response with these sections:
+## Recommended Transitions (per pair)
+## Pacing Notes
+## Audio Bridges
+## Cut Type Rationale
+## Risks To Avoid`;
+
+    const result = await callOpenRouter(aiPrompt);
+    res.json({ success: true, type: 'scene-transition-suggester', result });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Performance Predictor — engagement forecast for a video concept
+router.post('/performance-predictor', authenticate, async (req, res) => {
+  try {
+    if (!process.env.OPENROUTER_API_KEY) {
+      return res.status(503).json({ error: 'OPENROUTER_API_KEY not configured' });
+    }
+    const { title, description, platforms, audience, durationSeconds, hashtags } = req.body;
+    if (!title && !description) {
+      return res.status(400).json({ error: 'title or description is required' });
+    }
+
+    const aiPrompt = `You are a social-video performance analyst. Predict expected engagement for the following concept.
+
+Title: ${title || '(none)'}
+Description: ${description || '(none)'}
+Target Platforms: ${(Array.isArray(platforms) ? platforms.join(', ') : platforms) || 'YouTube, TikTok, Instagram'}
+Target Audience: ${audience || 'general'}
+Duration (seconds): ${durationSeconds || 'unspecified'}
+Hashtags: ${Array.isArray(hashtags) ? hashtags.join(', ') : (hashtags || 'none')}
+
+Provide the response with these sections:
+## Per-Platform Forecast
+## Engagement Drivers
+## Likely Risks
+## A/B Test Suggestions
+## Optimization Recommendations
+## Confidence`;
+
+    const result = await callOpenRouter(aiPrompt);
+    res.json({ success: true, type: 'performance-predictor', result });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Platform-Specific Export Optimizer — settings & cuts per target platform
+router.post('/platform-export-optimizer', authenticate, async (req, res) => {
+  try {
+    if (!process.env.OPENROUTER_API_KEY) {
+      return res.status(503).json({ error: 'OPENROUTER_API_KEY not configured' });
+    }
+    const { sourceFormat, durationSeconds, targets, contentSummary } = req.body;
+    if (!Array.isArray(targets) || targets.length === 0) {
+      return res.status(400).json({ error: 'targets (array) is required' });
+    }
+
+    const aiPrompt = `You are a multi-platform video distribution specialist. For each target platform, recommend export settings, recommended duration, aspect ratio, and content adaptations.
+
+Source Format: ${sourceFormat || 'unspecified'}
+Source Duration (seconds): ${durationSeconds || 'unspecified'}
+Content Summary: ${contentSummary || '(none)'}
+Targets: ${targets.join(', ')}
+
+Provide the response with these sections (one block per platform):
+## Per-Platform Settings
+## Recommended Cuts / Trims
+## Aspect Ratio & Safe Areas
+## Caption / Subtitle Notes
+## Thumbnail Recommendations
+## Posting Tips`;
+
+    const result = await callOpenRouter(aiPrompt);
+    res.json({ success: true, type: 'platform-export-optimizer', result });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Usage Analytics — credits / generations per user, no AI required.
+router.get('/usage-analytics', authenticate, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const [videos, images, voiceovers, storyboards] = await Promise.all([
+      VideoGeneration.count({ where: { userId } }),
+      ImageGeneration.count({ where: { userId } }),
+      Voiceover.count({ where: { userId } }),
+      Storyboard.count({ where: { userId } }),
+    ]);
+    // PRODUCT-DECISION: credit cost per generation type. These are
+    // illustrative defaults — production would source from a Plan model.
+    const COST = { video: 10, image: 2, voiceover: 5, storyboard: 3 };
+    const totalCredits =
+      videos * COST.video +
+      images * COST.image +
+      voiceovers * COST.voiceover +
+      storyboards * COST.storyboard;
+    res.json({
+      success: true,
+      counts: { videos, images, voiceovers, storyboards },
+      creditCost: COST,
+      totalCredits,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Brand Consistency Checker — checks supplied content against brand rules.
+// PRODUCT-DECISION: brand rules are passed in the request body as plain
+// text (not stored). Storing rules per-team requires a product decision
+// about team/permission scope which is out of scope for this pass.
+router.post('/brand-consistency', authenticate, async (req, res) => {
+  try {
+    if (!process.env.OPENROUTER_API_KEY) {
+      return res.status(503).json({ error: 'OPENROUTER_API_KEY not configured', missing: 'OPENROUTER_API_KEY' });
+    }
+    const { brandRules, content, contentType } = req.body;
+    if (!brandRules || !content) {
+      return res.status(400).json({ error: 'brandRules and content are required' });
+    }
+
+    const aiPrompt = `You are a brand consistency reviewer. Given the brand rules and the content, identify violations, near-misses, and aligned elements.
+
+Brand Rules:
+${brandRules}
+
+Content Type: ${contentType || 'unspecified'}
+Content:
+${content}
+
+Provide the response with these sections:
+## Overall Score (0-100)
+## Violations
+## Near-Misses
+## Aligned Elements
+## Recommended Fixes`;
+
+    const result = await callOpenRouter(aiPrompt);
+    res.json({ success: true, type: 'brand-consistency', result });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

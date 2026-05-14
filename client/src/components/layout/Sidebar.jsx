@@ -3,7 +3,8 @@ import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, FolderOpen, Settings, Sparkles,
   Zap, Menu, X, Table, FileText, BarChart3,
-  DollarSign, Users, CreditCard, GitBranch, Link2, PieChart
+  DollarSign, Users, CreditCard, GitBranch, Link2, PieChart,
+  Subtitles, Music, Film, TrendingUp, Share2, ShieldCheck, Activity
 } from 'lucide-react';
 
 const overviewNav = [
@@ -27,6 +28,15 @@ const configNav = [
   { path: '/templates', label: 'Templates', icon: FileText },
   { path: '/integrations', label: 'Integrations', icon: Link2 },
   { path: '/settings', label: 'Settings', icon: Settings },
+];
+const aiNav = [
+  { path: '/ai/auto-subtitle', label: 'Auto Subtitle', icon: Subtitles },
+  { path: '/ai/music-recommendation', label: 'Music Recommendation', icon: Music },
+  { path: '/ai/scene-transitions', label: 'Scene Transitions', icon: Film },
+  { path: '/ai/performance-predictor', label: 'Performance Predictor', icon: TrendingUp },
+  { path: '/ai/platform-export-optimizer', label: 'Platform Export', icon: Share2 },
+  { path: '/ai/usage-analytics', label: 'Usage Analytics', icon: Activity },
+  { path: '/ai/brand-consistency', label: 'Brand Consistency', icon: ShieldCheck },
 ];
 
 function NavItem({ path, label, icon: Icon }) {
@@ -96,6 +106,9 @@ export default function Sidebar() {
 
         <SectionLabel>Configuration</SectionLabel>
         {configNav.map((item) => <NavItem key={item.path} {...item} />)}
+
+        <SectionLabel>AI Tools</SectionLabel>
+        {aiNav.map((item) => <NavItem key={item.path} {...item} />)}
       </nav>
 
       {/* Bottom card */}

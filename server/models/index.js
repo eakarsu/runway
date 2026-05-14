@@ -15,6 +15,8 @@ const Plan = require('./Plan');
 const Report = require('./Report');
 const Scenario = require('./Scenario');
 const Integration = require('./Integration');
+const Comment = require('./Comment');
+const ProjectSnapshot = require('./ProjectSnapshot');
 
 // User associations
 User.hasMany(Project, { foreignKey: 'userId' });
@@ -72,6 +74,17 @@ Storyboard.belongsTo(Project, { foreignKey: 'projectId' });
 Project.hasMany(Export, { foreignKey: 'projectId' });
 Export.belongsTo(Project, { foreignKey: 'projectId' });
 
+// Apply pass 5 — additive associations for Comment / ProjectSnapshot.
+Project.hasMany(Comment, { foreignKey: 'projectId' });
+Comment.belongsTo(Project, { foreignKey: 'projectId' });
+User.hasMany(Comment, { foreignKey: 'userId' });
+Comment.belongsTo(User, { foreignKey: 'userId' });
+
+Project.hasMany(ProjectSnapshot, { foreignKey: 'projectId' });
+ProjectSnapshot.belongsTo(Project, { foreignKey: 'projectId' });
+User.hasMany(ProjectSnapshot, { foreignKey: 'userId' });
+ProjectSnapshot.belongsTo(User, { foreignKey: 'userId' });
+
 module.exports = {
   User,
   Project,
@@ -90,4 +103,6 @@ module.exports = {
   Report,
   Scenario,
   Integration,
+  Comment,
+  ProjectSnapshot,
 };

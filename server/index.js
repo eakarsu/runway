@@ -36,6 +36,12 @@ app.use('/api/reports', require('./routes/reports'));
 app.use('/api/scenarios', require('./routes/scenarios'));
 app.use('/api/integrations', require('./routes/integrations'));
 
+// Apply pass 5 — additive routes (comments, project snapshots, export adapters).
+app.use('/api/comments', require('./routes/comments'));
+app.use('/api/projects', require('./routes/projectSnapshots'));
+app.use('/api/export-adapters', require('./routes/exportAdapters'));
+app.use('/api/ai-extras', require('./routes/ai-extras'));
+
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
@@ -62,7 +68,9 @@ async function start() {
     await sequelize.sync({ alter: true });
     console.log('Database synced');
 
-    app.listen(PORT, () => {
+    app.use('/api', require('./routes/gap-features')); // === Batch 11 Gaps & Frontend Mounts ===
+
+app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });
   } catch (err) {
