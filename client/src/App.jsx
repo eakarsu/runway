@@ -44,11 +44,17 @@ import PlatformExportOptimizerPage from './pages/ai/PlatformExportOptimizerPage'
 import UsageAnalyticsPage from './pages/ai/UsageAnalyticsPage';
 import BrandConsistencyPage from './pages/ai/BrandConsistencyPage';
 
+import CodexCustomVizFeature from './pages/CodexCustomVizFeature';
+import CodexOperationsFeature from './pages/CodexOperationsFeature';
+
 export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
         <Routes>
+        <Route path="/codex/custom-viz" element={<CodexCustomVizFeature />} />
+        <Route path="/codex/operations" element={<CodexOperationsFeature />} />
+
           <Route path="/login" element={<LoginPage />} />
           <Route path="/" element={<AppLayout />}>
             <Route index element={<Navigate to="/dashboard" replace />} />
