@@ -20,7 +20,7 @@ export default function GapFeaturePage({ title, description, slug, endpoint, fie
       for (const f of fields) {
         let v = form[f.name]
         if (f.type === 'array' && typeof v === 'string') v = v.split(',').map(s => s.trim()).filter(Boolean)
-        if (f.type === 'json' && typeof v === 'string' && v.trim()) { try { v = JSON.parse(v) } catch {} }
+        if (f.type === 'json' && typeof v === 'string' && v.trim()) { try { v = JSON.parse(v) } catch { /* Best-effort prototype UI action. */ } }
         body[f.name] = v
       }
       const res = await fetch(apiPath, {

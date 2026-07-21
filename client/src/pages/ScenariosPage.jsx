@@ -39,14 +39,6 @@ export default function ScenariosPage() {
   const [scenarios] = useState(defaultScenarios);
   const [selected, setSelected] = useState([1, 2, 3]);
 
-  const comparisonData = Object.keys(metricLabels).map(key => {
-    const row = { metric: metricLabels[key].label };
-    scenarios.filter(s => selected.includes(s.id)).forEach(s => {
-      row[s.name] = s.metrics[key];
-    });
-    return row;
-  });
-
   const chartData = ['ARR', 'Cash Balance', 'EBITDA'].map(label => {
     const key = label === 'ARR' ? 'arr' : label === 'Cash Balance' ? 'cashBalance' : 'ebitda';
     const row = { metric: label };

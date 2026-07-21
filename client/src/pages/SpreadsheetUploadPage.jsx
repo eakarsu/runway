@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Upload, FileSpreadsheet, Check, Table, BarChart3, TrendingUp, Calculator, Sparkles } from 'lucide-react';
-import * as XLSX from 'xlsx';
+import { readSpreadsheet } from '../services/spreadsheetFile';
 import api from '../services/api';
 
 const templates = [
@@ -27,15 +27,14 @@ export default function SpreadsheetUploadPage() {
     setFile(f);
     setName(f.name.replace(/\.(xlsx?|csv)$/i, ''));
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       try {
-        const wb = XLSX.read(e.target.result, { type: 'array' });
-        const ws = wb.Sheets[wb.SheetNames[0]];
-        const jsonData = XLSX.utils.sheet_to_json(ws);
+        const wb = await readSpreadsheet(e.target.result, f.name);
+        const jsonData = wb.sheets[wb.sheetNames[0]];
         const columns = jsonData.length > 0 ? Object.keys(jsonData[0]) : [];
-        setPreview({ data: jsonData, columns, sheetName: wb.SheetNames[0], totalSheets: wb.SheetNames.length });
+        setPreview({ data: jsonData, columns, sheetName: wb.sheetNames[0], totalSheets: wb.sheetNames.length });
       } catch {
-        setError('Could not parse file. Please upload a valid Excel or CSV file.');
+        setError('Could not parse file. Please upload a valid .xlsx or CSV file.');
       }
     };
     reader.readAsArrayBuffer(f);
@@ -99,7 +98,7 @@ export default function SpreadsheetUploadPage() {
             dragOver ? 'border-accent/60 bg-accent/5' : file ? 'border-emerald-500/40' : 'border-dark-border/50 hover:border-accent/30'
           }`}
         >
-          <input ref={fileRef} type="file" accept=".xlsx,.xls,.csv" onChange={(e) => e.target.files[0] && parseFile(e.target.files[0])} className="hidden" />
+          <input ref={fileRef} type="file" accept=".xlsx,.csv" onChange={(e) => e.target.files[0] && parseFile(e.target.files[0])} className="hidden" />
           {file ? (
             <div className="flex flex-col items-center gap-3">
               <div className="w-14 h-14 bg-gradient-to-br from-emerald-500/20 to-teal-600/10 rounded-2xl flex items-center justify-center">
@@ -121,7 +120,7 @@ export default function SpreadsheetUploadPage() {
               </div>
               <div>
                 <p className="text-sm font-medium text-text-primary">Drop your Excel file here</p>
-                <p className="text-xs text-text-muted mt-1">or click to browse · Supports .xlsx, .xls, .csv</p>
+                <p className="text-xs text-text-muted mt-1">or click to browse · Supports .xlsx and .csv</p>
               </div>
             </div>
           )}

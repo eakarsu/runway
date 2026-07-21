@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Edit2, Trash2, Save, X, Table, Download, FileSpreadsheet, Plus, Play, MoreHorizontal, ChevronDown } from 'lucide-react';
-import * as XLSX from 'xlsx';
+import { downloadSpreadsheet } from '../services/spreadsheetFile';
 import Modal from '../components/ui/Modal';
 import api from '../services/api';
 
@@ -88,15 +88,15 @@ export default function SpreadsheetDetailPage() {
       setNameVal(d.name || '');
       setVariables(d.variables || []);
       setTabs(d.tabs?.length ? d.tabs : ['Variables']);
-    }).catch(() => {}).finally(() => setLoading(false));
+    }).catch(() => { /* Best-effort prototype UI request. */ }).finally(() => setLoading(false));
   }, [id]);
 
   const handleDelete = async () => {
-    try { await api.delete(`/spreadsheets/${id}`); navigate('/spreadsheets'); } catch {}
+    try { await api.delete(`/spreadsheets/${id}`); navigate('/spreadsheets'); } catch { /* Best-effort prototype UI action. */ }
   };
 
   const handleSaveName = async () => {
-    try { await api.put(`/spreadsheets/${id}`, { name: nameVal }); setItem({ ...item, name: nameVal }); setEditingName(false); } catch {}
+    try { await api.put(`/spreadsheets/${id}`, { name: nameVal }); setItem({ ...item, name: nameVal }); setEditingName(false); } catch { /* Best-effort prototype UI action. */ }
   };
 
   const addVariable = () => {
@@ -125,7 +125,7 @@ export default function SpreadsheetDetailPage() {
     try {
       await api.put(`/spreadsheets/${id}`, { variables, tabs });
       setItem({ ...item, variables, tabs });
-    } catch {}
+    } catch { /* Best-effort prototype UI action. */ }
   };
 
   const evaluateAll = async () => {
@@ -135,20 +135,18 @@ export default function SpreadsheetDetailPage() {
       const d = res.data?.data || res.data;
       setVariables(d.variables || []);
       setItem(d);
-    } catch {}
+    } catch { /* Best-effort prototype UI action. */ }
     setEvaluating(false);
   };
 
-  const handleExport = () => {
+  const handleExport = async () => {
     if (!item?.data?.length) return;
-    const ws = XLSX.utils.json_to_sheet(item.data);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Data');
+    const sheets = [{ name: 'Data', rows: item.data }];
     if (variables.length) {
       const varData = variables.map(v => ({ Variable: v.name, Formula: v.formula || '', Value: v.value }));
-      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(varData), 'Variables');
+      sheets.push({ name: 'Variables', rows: varData });
     }
-    XLSX.writeFile(wb, `${item.name || 'spreadsheet'}.xlsx`);
+    await downloadSpreadsheet(sheets, `${item.name || 'spreadsheet'}.xlsx`);
   };
 
   if (loading) return <div className="flex justify-center py-12"><div className="w-8 h-8 border-2 border-accent/30 border-t-accent rounded-full animate-spin" /></div>;
@@ -253,7 +251,7 @@ export default function SpreadsheetDetailPage() {
               No variables yet. Click "+ Add Variable" to get started.
             </div>
           )}
-          {tabVariables.map((v, idx) => {
+          {tabVariables.map((v) => {
             const realIndex = variables.indexOf(v);
             return (
               <div key={realIndex} className="grid grid-cols-[1fr_1fr_120px_40px] gap-0 px-5 py-0 items-center group hover:bg-white/[0.015] transition-colors">

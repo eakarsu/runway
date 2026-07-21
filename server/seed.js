@@ -5,21 +5,40 @@ const {
   User, Project, Asset, VideoGeneration, ImageGeneration,
   Template, Script, Storyboard, Voiceover, StylePreset, Export, Spreadsheet,
 } = require('./models');
+const { migrate } = require('./scripts/migrate');
 
 async function seed() {
   try {
+    if (process.env.ALLOW_DISPOSABLE_SEED !== 'YES') {
+      throw new Error('Refusing destructive seed. Set ALLOW_DISPOSABLE_SEED=YES only for a disposable database.');
+    }
+    const databaseUrl = new URL(process.env.DATABASE_URL);
+    const databaseName = databaseUrl.pathname.replace(/^\//, '');
+    if (!databaseName || process.env.DISPOSABLE_DATABASE_CONFIRMATION !== databaseName) {
+      throw new Error('DISPOSABLE_DATABASE_CONFIRMATION must exactly match the target database name.');
+    }
+    if (!['127.0.0.1', 'localhost'].includes(databaseUrl.hostname) && process.env.ALLOW_REMOTE_DISPOSABLE_SEED !== 'YES') {
+      throw new Error('Remote destructive seed requires ALLOW_REMOTE_DISPOSABLE_SEED=YES.');
+    }
+    const seedEmail = String(process.env.SEED_ADMIN_EMAIL || '').trim().toLowerCase();
+    const seedPassword = String(process.env.SEED_ADMIN_PASSWORD || '');
+    if (!seedEmail || seedPassword.length < 16) {
+      throw new Error('SEED_ADMIN_EMAIL and a SEED_ADMIN_PASSWORD of at least 16 characters are required.');
+    }
     console.log('Connecting to database...');
     await sequelize.authenticate();
 
     console.log('Syncing database (force: true)...');
     await sequelize.sync({ force: true });
+    await sequelize.query('DROP TABLE IF EXISTS "SchemaMigrations"');
+    await migrate();
 
     // Create default user
     console.log('Creating default user...');
     const user = await User.create({
-      email: 'admin@runway.com',
-      password: 'admin123',
-      name: 'Admin User',
+      email: seedEmail,
+      password: seedPassword,
+      name: process.env.SEED_ADMIN_NAME || 'Runway Operator',
     });
     const userId = user.id;
 
@@ -214,7 +233,7 @@ async function seed() {
 
     // Exports
     console.log('Seeding Exports...');
-    await Export.bulkCreate([
+    const exportFixtures = [
       { name: 'Brand Campaign Final Cut', format: 'mp4', resolution: '4K', status: 'completed', fileUrl: '/exports/brand-campaign-final.mp4', projectId: projects[0].id, userId },
       { name: 'Neon Dreams - Master', format: 'mov', resolution: '4K', status: 'completed', fileUrl: '/exports/neon-dreams-master.mov', projectId: projects[1].id, userId },
       { name: 'TechVision Teaser v2', format: 'mp4', resolution: '1080p', status: 'completed', fileUrl: '/exports/techvision-teaser-v2.mp4', projectId: projects[2].id, userId },
@@ -231,7 +250,14 @@ async function seed() {
       { name: 'Pitch Deck Video Final', format: 'mp4', resolution: '1080p', status: 'processing', fileUrl: null, projectId: projects[13].id, userId },
       { name: 'Concert Overlay Pack', format: 'mov', resolution: '1080p', status: 'completed', fileUrl: '/exports/concert-overlays.mov', projectId: projects[14].id, userId },
       { name: 'Product Showcase GIF Set', format: 'gif', resolution: '800x800', status: 'completed', fileUrl: '/exports/product-gifs.zip', projectId: projects[15].id, userId },
-    ]);
+    ].map((item, index) => ({
+      ...item,
+      status: 'failed',
+      projectVersion: 0,
+      idempotencyKey: `disposable-seed-export-${index + 1}`,
+      lastError: 'Disposable legacy fixture; governed review is required before submission',
+    }));
+    await Export.bulkCreate(exportFixtures);
 
     // Spreadsheets
     console.log('Seeding Spreadsheets...');
@@ -445,7 +471,7 @@ async function seed() {
     ]);
 
     console.log('\nSeed completed successfully!');
-    console.log('Default user: admin@runway.com / admin123');
+    console.log(`Operator user created: ${seedEmail}`);
     console.log('Seeded 16 items each for: Projects, Assets, VideoGenerations, ImageGenerations, Templates, Scripts, Storyboards, Voiceovers, StylePresets, Exports, Spreadsheets');
 
     process.exit(0);

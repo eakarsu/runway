@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Table, Upload, FileSpreadsheet, Plus, X, Save, Download, Trash2, Play, ChevronDown, ChevronUp, Search, BarChart3, ArrowUpDown, EyeOff, Check, PieChart, TrendingUp, Hash, Type, Calendar, MessageSquare, Palette, GitBranch, Clock, FileText, Printer, Zap, ArrowLeft } from 'lucide-react';
-import * as XLSX from 'xlsx';
+import { downloadSpreadsheet, readSpreadsheet } from '../services/spreadsheetFile';
 import api from '../services/api';
 import { FORMULAS, STANDALONE, evalFormula, round2, _nums, _sum } from '../utils/formulaEngine';
 
@@ -163,7 +163,6 @@ export default function SpreadsheetsPage() {
   const location = useLocation();
   const fileRef = useRef(null);
   const [saved, setSaved] = useState([]);
-  const [loadingSaved, setLoadingSaved] = useState(true);
 
   // Workbook
   const [fileName, setFileName] = useState('');
@@ -233,7 +232,7 @@ export default function SpreadsheetsPage() {
   const [setupError, setSetupError] = useState('');
 
   useEffect(() => {
-    api.get('/spreadsheets').then(r => setSaved(r.data?.data || r.data || [])).catch(() => []).finally(() => setLoadingSaved(false));
+    api.get('/spreadsheets').then(r => setSaved(r.data?.data || r.data || [])).catch(() => []);
   }, []);
 
   // Load spreadsheet from dashboard navigation
@@ -286,7 +285,7 @@ export default function SpreadsheetsPage() {
   };
 
   const processSheet = (wb, sheetName) => {
-    const jsonData = XLSX.utils.sheet_to_json(wb.Sheets[sheetName]);
+    const jsonData = wb.sheets[sheetName];
     const cols = jsonData.length > 0 ? Object.keys(jsonData[0]) : [];
     setActiveSheet(sheetName);
     loadData(jsonData, cols, fileName);
@@ -295,15 +294,15 @@ export default function SpreadsheetsPage() {
   const handleFile = (f) => {
     setFileName(f.name); setVariables([]);
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       try {
-        const wb = XLSX.read(e.target.result, { type: 'array' });
-        setWorkbook(wb); setSheetNames(wb.SheetNames);
-        const jsonData = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+        const wb = await readSpreadsheet(e.target.result, f.name);
+        setWorkbook(wb); setSheetNames(wb.sheetNames);
+        const jsonData = wb.sheets[wb.sheetNames[0]];
         const cols = jsonData.length > 0 ? Object.keys(jsonData[0]) : [];
-        setActiveSheet(wb.SheetNames[0]);
+        setActiveSheet(wb.sheetNames[0]);
         loadData(jsonData, cols, f.name);
-      } catch { }
+      } catch { /* Best-effort prototype UI action. */ }
     };
     reader.readAsArrayBuffer(f);
   };
@@ -340,16 +339,14 @@ export default function SpreadsheetsPage() {
     try {
       await api.post('/spreadsheets/upload', { name: fileName || 'Untitled', data, columns, variables, fileName, fileSize: 0, template: 'custom' });
       const r = await api.get('/spreadsheets'); setSaved(r.data?.data || r.data || []);
-    } catch {} setSaving(false);
+    } catch { /* Best-effort prototype UI action. */ } setSaving(false);
   };
 
-  const handleExport = () => {
+  const handleExport = async () => {
     if (!data.length) return;
-    const ws = XLSX.utils.json_to_sheet(data);
-    const wb2 = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb2, ws, 'Data');
-    if (variables.length) XLSX.utils.book_append_sheet(wb2, XLSX.utils.json_to_sheet(variables.map(v => ({ Name: v.name, Formula: v.formula, Value: v.value }))), 'Variables');
-    XLSX.writeFile(wb2, `${fileName || 'export'}.xlsx`);
+    const sheets = [{ name: 'Data', rows: data }];
+    if (variables.length) sheets.push({ name: 'Variables', rows: variables.map(v => ({ Name: v.name, Formula: v.formula, Value: v.value })) });
+    await downloadSpreadsheet(sheets, `${fileName || 'export'}.xlsx`);
   };
 
   const handlePrintReport = () => {
@@ -361,7 +358,7 @@ export default function SpreadsheetsPage() {
     setTimeout(() => printWin.print(), 500);
   };
 
-  const deleteSaved = async (id, e) => { e.stopPropagation(); try { await api.delete(`/spreadsheets/${id}`); setSaved(saved.filter(s => s.id !== id)); } catch {} };
+  const deleteSaved = async (id, e) => { e.stopPropagation(); try { await api.delete(`/spreadsheets/${id}`); setSaved(saved.filter(s => s.id !== id)); } catch { /* Best-effort prototype UI action. */ } };
 
   const clearAll = () => { setFileName(''); setData([]); setColumns([]); setVariables([]); setAutoCalcs([]); setSheetNames([]); setWorkbook(null); setSearch(''); setColumnFilters({}); setSortCol(null); setHiddenCols(new Set()); setPage(0); setComments({}); setFormatRules([]); };
 
@@ -387,7 +384,7 @@ export default function SpreadsheetsPage() {
   const totalPages = Math.ceil(filteredData.length / pageSize);
   const activeFilterCount = Object.values(columnFilters).filter(Boolean).length;
   const hasData = data.length > 0;
-  const numericCols = columns.filter(c => detectColumnType(data, c) === 'number');
+  const numericCols = useMemo(() => columns.filter(c => detectColumnType(data, c) === 'number'), [columns, data]);
 
   // Cell edit
   const startEdit = (rowIdx, col) => { setEditingCell({ rowIdx, col }); setEditValue(String(data[rowIdx]?.[col] ?? '')); };
@@ -442,7 +439,7 @@ export default function SpreadsheetsPage() {
     const baseVals = data.map(r => Number(r[scenarioCol]) || 0);
     const baseTotal = baseVals.reduce((a, b) => a + b, 0);
     return scenarios.map(s => ({ ...s, total: round2(baseTotal * s.multiplier), values: baseVals.map(v => round2(v * s.multiplier)) }));
-  }, [data, scenarioCol, scenarios]);
+  }, [data, numericCols, scenarioCol, scenarios]);
 
   // Forecast data
   const forecastData = useMemo(() => {
@@ -675,12 +672,12 @@ export default function SpreadsheetsPage() {
             onClick={() => fileRef.current?.click()}
             className={`border-2 border-dashed rounded-2xl p-16 text-center cursor-pointer transition-all duration-300 ${dragOver ? 'border-violet-400 bg-violet-50' : 'border-gray-300 hover:border-violet-300 bg-white/50'}`}
           >
-            <input ref={fileRef} type="file" accept=".xlsx,.xls,.csv" onChange={e => e.target.files[0] && handleFile(e.target.files[0])} className="hidden" />
+            <input ref={fileRef} type="file" accept=".xlsx,.csv" onChange={e => e.target.files[0] && handleFile(e.target.files[0])} className="hidden" />
             <div className="w-20 h-20 bg-gradient-to-br from-violet-100 to-purple-50 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-violet-200/50">
               <Upload className="w-10 h-10 text-violet-500" />
             </div>
             <p className="text-xl font-bold text-text-primary">Drop your Excel or CSV file here</p>
-            <p className="text-sm text-text-muted mt-2">or click to browse · .xlsx .xls .csv</p>
+            <p className="text-sm text-text-muted mt-2">or click to browse · .xlsx .csv</p>
           </div>
 
           {/* Templates */}
@@ -714,7 +711,7 @@ export default function SpreadsheetsPage() {
             ))}
             <div className="ml-auto flex items-center gap-2">
               <button onClick={() => fileRef.current?.click()} className="text-xs text-violet-600 hover:underline font-medium">Change</button>
-              <input ref={fileRef} type="file" accept=".xlsx,.xls,.csv" onChange={e => e.target.files[0] && handleFile(e.target.files[0])} className="hidden" />
+              <input ref={fileRef} type="file" accept=".xlsx,.csv" onChange={e => e.target.files[0] && handleFile(e.target.files[0])} className="hidden" />
               <button onClick={clearAll} className="text-xs text-text-muted hover:text-red-500">Clear</button>
             </div>
           </div>

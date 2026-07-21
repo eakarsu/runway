@@ -1,66 +1,73 @@
-// Apply pass 5 — comment / annotation routes.
-// PRODUCT-DECISION: comments are scoped per-project, only the comment author
-// can delete (no admin override). Threading omitted (top-level only).
-// No required env vars.
+const crypto = require('node:crypto');
 const express = require('express');
+const sequelize = require('../config/database');
 const authenticate = require('../middleware/auth');
-const { Comment, User } = require('../models');
+const { Comment, Project, User } = require('../models');
+const { appendAudit } = require('../lib/audit');
+const { InputError, integerId, text, safeError } = require('../lib/validation');
 
 const router = express.Router();
+router.use(authenticate);
 
-// List comments for a project
-router.get('/project/:projectId', authenticate, async (req, res) => {
+function respondError(res, error) {
+  const safe = safeError(error);
+  if (safe.status === 500) console.error(error);
+  return res.status(safe.status).json(safe.body);
+}
+
+async function ownedProject(value, userId, transaction, lock = false) {
+  const project = await Project.findOne({
+    where: { id: integerId(value, 'project id'), userId },
+    transaction,
+    lock: lock ? transaction.LOCK.UPDATE : undefined,
+  });
+  if (!project) throw new InputError('Project not found', 404, 'NOT_FOUND');
+  return project;
+}
+
+router.get('/project/:projectId', async (req, res) => {
   try {
-    const projectId = parseInt(req.params.projectId, 10);
-    if (Number.isNaN(projectId)) {
-      return res.status(400).json({ error: 'Invalid project id' });
-    }
+    const project = await ownedProject(req.params.projectId, req.user.id);
     const comments = await Comment.findAll({
-      where: { projectId },
+      where: { projectId: project.id, userId: req.user.id },
       order: [['createdAt', 'DESC']],
       include: [{ model: User, attributes: ['id', 'email', 'name'] }],
     });
-    res.json({ success: true, comments });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+    res.json({ data: comments });
+  } catch (error) { respondError(res, error); }
 });
 
-// Create a comment
-router.post('/', authenticate, async (req, res) => {
+router.post('/', async (req, res) => {
   try {
-    const { projectId, body, anchor } = req.body;
-    if (!projectId || !body) {
-      return res.status(400).json({ error: 'projectId and body are required' });
-    }
-    const comment = await Comment.create({
-      projectId,
-      userId: req.user.id,
-      body,
-      anchor: anchor || null,
+    const body = text(req.body?.body, 'body', { max: 5000 });
+    const anchor = text(req.body?.anchor, 'anchor', { max: 255, optional: true });
+    const comment = await sequelize.transaction(async (transaction) => {
+      const project = await ownedProject(req.body?.projectId, req.user.id, transaction, true);
+      const created = await Comment.create({ projectId: project.id, userId: req.user.id, body, anchor: anchor ?? null }, { transaction });
+      await appendAudit({
+        projectId: project.id,
+        actorId: req.user.id,
+        action: 'COMMENT_ADDED',
+        payload: { commentId: created.id, bodyHash: crypto.createHash('sha256').update(body).digest('hex'), anchor: created.anchor },
+        transaction,
+      });
+      return created;
     });
-    res.status(201).json({ success: true, comment });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+    res.status(201).json(comment);
+  } catch (error) { respondError(res, error); }
 });
 
-// Delete a comment (author only)
-router.delete('/:id', authenticate, async (req, res) => {
+router.delete('/:id', async (req, res) => {
   try {
-    const id = parseInt(req.params.id, 10);
-    const comment = await Comment.findByPk(id);
-    if (!comment) {
-      return res.status(404).json({ error: 'Not found' });
-    }
-    if (comment.userId !== req.user.id) {
-      return res.status(403).json({ error: 'Only the author can delete this comment' });
-    }
-    await comment.destroy();
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+    await sequelize.transaction(async (transaction) => {
+      const comment = await Comment.findOne({ where: { id: integerId(req.params.id), userId: req.user.id }, transaction, lock: transaction.LOCK.UPDATE });
+      if (!comment) throw new InputError('Comment not found', 404, 'NOT_FOUND');
+      const project = await ownedProject(comment.projectId, req.user.id, transaction, true);
+      await comment.destroy({ transaction });
+      await appendAudit({ projectId: project.id, actorId: req.user.id, action: 'COMMENT_REMOVED', payload: { commentId: comment.id }, transaction });
+    });
+    res.status(204).end();
+  } catch (error) { respondError(res, error); }
 });
 
 module.exports = router;

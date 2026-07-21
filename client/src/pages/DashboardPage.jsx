@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   DollarSign, TrendingUp, TrendingDown, Users, Flame, Clock,
@@ -9,8 +9,6 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, AreaChart, Area, Legend
 } from 'recharts';
-import api from '../services/api';
-
 const kpiData = {
   mrr: { value: 186500, prev: 172000, label: 'MRR', format: '$', path: '/planning/revenue' },
   arr: { value: 2238000, prev: 2064000, label: 'ARR', format: '$', path: '/planning/revenue' },
@@ -180,27 +178,7 @@ const formatKPI = (value, format, unit) => {
 
 export default function DashboardPage() {
   const navigate = useNavigate();
-  const [stats, setStats] = useState({ spreadsheets: 0, models: 0, templates: 0, reports: 0 });
   const [previewItem, setPreviewItem] = useState(null);
-
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const [s, p, t, e] = await Promise.allSettled([
-          api.get('/spreadsheets'), api.get('/projects'), api.get('/templates'), api.get('/exports')
-        ]);
-        setStats({
-          spreadsheets: s.status === 'fulfilled' ? (s.value.data?.data?.length || 0) : 8,
-          models: p.status === 'fulfilled' ? (p.value.data?.data?.length || 0) : 5,
-          templates: t.status === 'fulfilled' ? (t.value.data?.data?.length || 0) : 12,
-          reports: e.status === 'fulfilled' ? (e.value.data?.data?.length || 0) : 3,
-        });
-      } catch {
-        setStats({ spreadsheets: 8, models: 5, templates: 12, reports: 3 });
-      }
-    };
-    fetchStats();
-  }, []);
 
   return (
     <div className="space-y-8 animate-fade-in">

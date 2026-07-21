@@ -17,6 +17,7 @@ const Scenario = require('./Scenario');
 const Integration = require('./Integration');
 const Comment = require('./Comment');
 const ProjectSnapshot = require('./ProjectSnapshot');
+const AuditEvent = require('./AuditEvent');
 
 // User associations
 User.hasMany(Project, { foreignKey: 'userId' });
@@ -85,6 +86,11 @@ ProjectSnapshot.belongsTo(Project, { foreignKey: 'projectId' });
 User.hasMany(ProjectSnapshot, { foreignKey: 'userId' });
 ProjectSnapshot.belongsTo(User, { foreignKey: 'userId' });
 
+Project.hasMany(AuditEvent, { foreignKey: 'projectId' });
+AuditEvent.belongsTo(Project, { foreignKey: 'projectId' });
+User.hasMany(AuditEvent, { foreignKey: 'actorId', as: 'auditEvents' });
+AuditEvent.belongsTo(User, { foreignKey: 'actorId', as: 'actor' });
+
 module.exports = {
   User,
   Project,
@@ -105,4 +111,5 @@ module.exports = {
   Integration,
   Comment,
   ProjectSnapshot,
+  AuditEvent,
 };

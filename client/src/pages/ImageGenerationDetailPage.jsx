@@ -15,14 +15,14 @@ export default function ImageGenerationDetailPage() {
   const [deleteModal, setDeleteModal] = useState(false);
 
   useEffect(() => {
-    api.get(`/image-generations/${id}`).then(r => { const d = r.data?.data || r.data; setItem(d); setForm(d); }).catch(() => {}).finally(() => setLoading(false));
+    api.get(`/image-generations/${id}`).then(r => { const d = r.data?.data || r.data; setItem(d); setForm(d); }).catch(() => { /* Best-effort prototype UI request. */ }).finally(() => setLoading(false));
   }, [id]);
 
   const handleSave = async () => {
-    try { await api.put(`/image-generations/${id}`, form); setItem({...form}); setEditing(false); } catch {}
+    try { await api.put(`/image-generations/${id}`, form); setItem({...form}); setEditing(false); } catch { /* Best-effort prototype UI action. */ }
   };
   const handleDelete = async () => {
-    try { await api.delete(`/image-generations/${id}`); navigate('/image-generations'); } catch {}
+    try { await api.delete(`/image-generations/${id}`); navigate('/image-generations'); } catch { /* Best-effort prototype UI action. */ }
   };
 
   if (loading) return <div className="flex justify-center py-12"><div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" /></div>;

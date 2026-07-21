@@ -35,6 +35,9 @@ const ProjectSnapshot = sequelize.define('ProjectSnapshot', {
   status: {
     type: DataTypes.STRING,
   },
+  reviewStatus: {
+    type: DataTypes.STRING,
+  },
   thumbnail: {
     type: DataTypes.STRING,
   },

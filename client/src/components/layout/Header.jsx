@@ -52,7 +52,7 @@ export default function Header() {
           </div>
           <div className="hidden sm:block">
             <div className="text-xs font-medium text-gray-900 leading-tight">{user?.name || 'Admin User'}</div>
-            <div className="text-[10px] text-gray-400 leading-tight">{user?.email || 'admin@runway.com'}</div>
+            <div className="text-[10px] text-gray-400 leading-tight">{user?.email || 'Signed in'}</div>
           </div>
           <button
             onClick={handleLogout}

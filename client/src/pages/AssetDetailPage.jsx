@@ -15,14 +15,14 @@ export default function AssetDetailPage() {
   const [deleteModal, setDeleteModal] = useState(false);
 
   useEffect(() => {
-    api.get(`/assets/${id}`).then(r => { const d = r.data?.data || r.data; setItem(d); setForm(d); }).catch(() => {}).finally(() => setLoading(false));
+    api.get(`/assets/${id}`).then(r => { const d = r.data?.data || r.data; setItem(d); setForm(d); }).catch(() => { /* Best-effort prototype UI request. */ }).finally(() => setLoading(false));
   }, [id]);
 
   const handleSave = async () => {
-    try { await api.put(`/assets/${id}`, form); setItem({...form}); setEditing(false); } catch {}
+    try { await api.put(`/assets/${id}`, form); setItem({...form}); setEditing(false); } catch { /* Best-effort prototype UI action. */ }
   };
   const handleDelete = async () => {
-    try { await api.delete(`/assets/${id}`); navigate('/assets'); } catch {}
+    try { await api.delete(`/assets/${id}`); navigate('/assets'); } catch { /* Best-effort prototype UI action. */ }
   };
 
   if (loading) return <div className="flex justify-center py-12"><div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" /></div>;

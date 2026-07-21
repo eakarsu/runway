@@ -29,7 +29,7 @@ export default function SettingsPage() {
           </div>
           <div>
             <label className="block text-sm text-text-secondary mb-1.5">Email</label>
-            <input defaultValue={user?.email || 'admin@runway.com'} className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent" />
+            <input defaultValue={user?.email || ''} className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent" />
           </div>
         </div>
       </div>

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Zap, Mail, Lock, LogIn, Sparkles, Video, Image, Mic, Wand2 } from 'lucide-react';
+import { Zap, Mail, Lock, LogIn, Video, Image, Mic, Wand2 } from 'lucide-react';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -22,11 +22,6 @@ export default function LoginPage() {
     } else {
       setError(result.error);
     }
-  };
-
-  const handleDemo = () => {
-    setEmail('admin@runway.com');
-    setPassword('admin123');
   };
 
   return (
@@ -113,19 +108,6 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-dark-border" /></div>
-            <div className="relative flex justify-center"><span className="bg-dark-card px-3 text-xs text-text-muted">or</span></div>
-          </div>
-
-          <button
-            type="button"
-            onClick={handleDemo}
-            className="w-full bg-dark-bg/40 hover:bg-dark-bg/60 border border-dark-border hover:border-accent/30 text-text-secondary hover:text-text-primary font-medium py-3 rounded-xl transition-all text-sm flex items-center justify-center gap-2"
-          >
-            <Sparkles className="w-4 h-4 text-accent-light" />
-            Demo Login — auto-fill credentials
-          </button>
         </div>
 
         {/* Feature pills */}

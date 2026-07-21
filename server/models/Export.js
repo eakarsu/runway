@@ -29,10 +29,37 @@ const Export = sequelize.define('Export', {
   projectId: {
     type: DataTypes.INTEGER,
   },
+  projectVersion: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
   userId: {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
+  idempotencyKey: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  provider: {
+    type: DataTypes.STRING,
+  },
+  providerReference: {
+    type: DataTypes.STRING,
+  },
+  attempts: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0,
+  },
+  lastError: {
+    type: DataTypes.TEXT,
+  },
+  nextRetryAt: {
+    type: DataTypes.DATE,
+  },
+}, {
+  indexes: [{ unique: true, fields: ['userId', 'idempotencyKey'] }],
 });
 
 module.exports = Export;

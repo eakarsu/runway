@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Save, Settings, TrendingUp } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, AreaChart, Area } from 'recharts';
 
@@ -44,7 +44,6 @@ function grow(base, rate, month) {
 }
 
 export default function ProjectDetailPage() {
-  const { id } = useParams();
   const navigate = useNavigate();
   const [drivers, setDrivers] = useState(defaultDrivers);
   const [showDrivers, setShowDrivers] = useState(true);
