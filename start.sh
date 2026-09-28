@@ -96,6 +96,8 @@ for assigned_port in "$BACKEND_PORT" "$FRONTEND_PORT";do [[ "$assigned_port" =~ 
 export RUNTIME_PROJECT_NAME=runway RUNTIME_AI_ENDPOINT=/api/ai/creative-production-review RUNTIME_AI_FEATURE=creative-production-review
 export RUNTIME_AI_SYSTEM_PROMPT='You are a governed creative-production assistant. Review project sources, asset rights, edit intent, version history, review notes, provider evidence, export constraints, approval status, and explicit human release gates.'
 node "$PROJECT_DIR/runtime/setup.mjs"
+export VITE_API_URL=/api
+(cd "$PROJECT_DIR/client" && npm run build)
 CHILD_PIDS=()
 (cd "$PROJECT_DIR"&&exec node runtime/api.mjs)&CHILD_PIDS+=("$!")
 (cd "$PROJECT_DIR/client"&&exec npm run preview -- --host 127.0.0.1 --port "$FRONTEND_PORT" --strictPort)&CHILD_PIDS+=("$!")
