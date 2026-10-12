@@ -1,9 +1,13 @@
+
+import FullAIExamples, { useFullAIExamples } from "../../components/FullAIExamples.jsx";
 import { useState } from 'react';
 import { Subtitles, Sparkles } from 'lucide-react';
 import AIResponseDisplay from '../../components/ui/AIResponseDisplay';
 import api from '../../services/api';
 
 export default function AutoSubtitlePage() {
+  const fullAIExamples = useFullAIExamples();
+
   const [form, setForm] = useState({
     transcript: '',
     targetLanguage: 'en',
@@ -21,7 +25,7 @@ export default function AutoSubtitlePage() {
     setResponse(null);
     try {
       const res = await api.post('/ai/auto-subtitle-generator', form);
-      setResponse(res.data?.data || res.data?.result || res.data);
+      setResponse(res.data?.data ?? res.data?.result ?? res.data);
     } catch (err) {
       setError(err.response?.data?.error || 'Something went wrong. Please try again.');
     } finally {
@@ -39,7 +43,7 @@ export default function AutoSubtitlePage() {
         <p className="text-text-muted mt-1">Generate accessible, SEO-friendly subtitles from a transcript</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-gradient-to-br from-dark-card/80 to-dark-surface/30 border border-dark-border/50 rounded-2xl p-6 space-y-5 backdrop-blur-sm">
+      <form onSubmit={handleSubmit} className="bg-gradient-to-br from-dark-card/80 to-dark-surface/30 border border-dark-border/50 rounded-2xl p-6 space-y-5 backdrop-blur-sm" data-full-ai-workspace="AutoSubtitlePage"><FullAIExamples controller={fullAIExamples} disabled={Boolean(loading)} />
         <div>
           <label className="block text-sm text-text-secondary mb-1.5">Transcript</label>
           <textarea
@@ -47,7 +51,7 @@ export default function AutoSubtitlePage() {
             onChange={(e) => setForm({ ...form, transcript: e.target.value })}
             placeholder="Paste the spoken transcript or rough captions..."
             className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-3 text-text-primary text-sm focus:outline-none focus:border-accent min-h-[160px] resize-y"
-            required
+            required data-full-ai-field={fullAIExamples.bind({ current: form.transcript, change: (e) => setForm({ ...form, transcript: e.target.value }), label: "form.transcript", manual: false, json: false, sample: '' }, "p1-1733", undefined)}
           />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -58,7 +62,7 @@ export default function AutoSubtitlePage() {
               value={form.targetLanguage}
               onChange={(e) => setForm({ ...form, targetLanguage: e.target.value })}
               placeholder="e.g., en, es, fr"
-              className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent"
+              className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent" data-full-ai-field={fullAIExamples.bind({ current: form.targetLanguage, change: (e) => setForm({ ...form, targetLanguage: e.target.value }), label: "form.targetLanguage", manual: false, json: false, sample: 'en' }, "p1-2353", undefined)}
             />
           </div>
           <div>
@@ -66,7 +70,7 @@ export default function AutoSubtitlePage() {
             <select
               value={form.style}
               onChange={(e) => setForm({ ...form, style: e.target.value })}
-              className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent"
+              className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent" data-full-ai-field={fullAIExamples.bind({ current: form.style, change: (e) => setForm({ ...form, style: e.target.value }), label: "form.style", manual: false, json: false, sample: 'broadcast' }, "p1-2868", undefined)}
             >
               <option value="broadcast">broadcast</option>
               <option value="cinematic">cinematic</option>
@@ -80,7 +84,7 @@ export default function AutoSubtitlePage() {
               type="number"
               value={form.maxLineLength}
               onChange={(e) => setForm({ ...form, maxLineLength: Number(e.target.value) })}
-              className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent"
+              className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent" data-full-ai-field={fullAIExamples.bind({ current: form.maxLineLength, change: (e) => setForm({ ...form, maxLineLength: Number(e.target.value) }), label: "form.maxLineLength", manual: false, json: false, sample: 42 }, "p1-3576", undefined)}
             />
           </div>
         </div>

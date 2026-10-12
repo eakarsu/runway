@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FolderOpen, Plus, ArrowLeft, TrendingUp, DollarSign, BarChart3, PieChart, X } from 'lucide-react';
 import StatusBadge from '../components/ui/StatusBadge';
-import api from '../services/api';
+import api, { rowsFromResponse } from '../services/api';
 
 const modelTypes = [
   { key: 'all', label: 'All Models' },
@@ -35,10 +35,9 @@ export default function ProjectsPage() {
 
   useEffect(() => {
     api.get('/financial-models').then(r => {
-      const data = r.data?.data || r.data || [];
+      const data = rowsFromResponse(r.data);
       // Only use API data if it contains financial model types, otherwise use mock data
-      const hasFinancialData = data.length > 0 && data.some(d => ['pnl','cashflow','balance','custom'].includes(d.type));
-      setItems(hasFinancialData ? data : mockModels);
+      setItems(data.length ? data : mockModels);
     }).catch(() => setItems(mockModels)).finally(() => setLoading(false));
   }, []);
 

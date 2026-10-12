@@ -1,3 +1,4 @@
+import { StructuredAIValue } from '../components/ui/AIResponseDisplay';
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Edit2, Trash2, Save, X } from 'lucide-react';
@@ -61,7 +62,7 @@ export default function StoryboardDetailPage() {
             : <p className="text-sm text-text-secondary mt-1">{item.description || item.prompt || 'No description'}</p>}
           </div>
           {item.prompt && <div><label className="text-xs text-text-muted uppercase tracking-wider">Prompt</label><p className="text-sm text-text-secondary mt-1 bg-dark-surface rounded-lg p-3">{item.prompt}</p></div>}
-          {item.result && <div><label className="text-xs text-text-muted uppercase tracking-wider">Result</label><p className="text-sm text-text-secondary mt-1 bg-dark-surface rounded-lg p-3 whitespace-pre-wrap">{typeof item.result === 'string' ? item.result : JSON.stringify(item.result, null, 2)}</p></div>}
+          {item.result !== null && item.result !== undefined && <div><label className="text-xs text-text-muted uppercase tracking-wider">Result</label><div className="mt-1"><StructuredAIValue value={item.result} /></div></div>}
           <div className="grid grid-cols-2 gap-4">
             <div><label className="text-xs text-text-muted uppercase tracking-wider">Status</label>
               {editing ? <select value={form.status || ''} onChange={e => setForm({ ...form, status: e.target.value })} className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-3 py-2 text-text-primary text-sm mt-1 focus:outline-none focus:border-accent">

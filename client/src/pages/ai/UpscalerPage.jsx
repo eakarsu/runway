@@ -1,9 +1,13 @@
+
+import FullAIExamples, { useFullAIExamples } from "../../components/FullAIExamples.jsx";
 import { useState } from 'react';
 import { Maximize, Sparkles, Send } from 'lucide-react';
 import AIResponseDisplay from '../../components/ui/AIResponseDisplay';
 import api from '../../services/api';
 
 export default function UpscalerPage() {
+  const fullAIExamples = useFullAIExamples();
+
   const [form, setForm] = useState({ prompt: '', scale: '2x', denoise: 'none', faceEnhance: 'off' });
   const [response, setResponse] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -16,7 +20,7 @@ export default function UpscalerPage() {
     setResponse(null);
     try {
       const res = await api.post('/ai/upscaler', form);
-      setResponse(res.data?.data || res.data?.result || res.data);
+      setResponse(res.data?.data ?? res.data?.result ?? res.data);
     } catch (err) {
       setError(err.response?.data?.error || 'Something went wrong. Please try again.');
     } finally {
@@ -34,26 +38,26 @@ export default function UpscalerPage() {
         <p className="text-text-muted mt-1">Enhance and upscale images with AI super-resolution</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-gradient-to-br from-dark-card/80 to-dark-surface/30 border border-dark-border/50 rounded-2xl p-6 space-y-5 backdrop-blur-sm">
+      <form onSubmit={handleSubmit} className="bg-gradient-to-br from-dark-card/80 to-dark-surface/30 border border-dark-border/50 rounded-2xl p-6 space-y-5 backdrop-blur-sm" data-full-ai-workspace="UpscalerPage"><FullAIExamples controller={fullAIExamples} disabled={Boolean(loading)} />
         <div>
           <label className="block text-sm text-text-secondary mb-1.5">Image URL or Description</label>
-          <textarea value={form.prompt} onChange={e => setForm({ ...form, prompt: e.target.value })} placeholder="Provide image URL or describe enhancement needs..." className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-3 text-text-primary text-sm focus:outline-none focus:border-accent min-h-[120px] resize-y" required />
+          <textarea value={form.prompt} onChange={e => setForm({ ...form, prompt: e.target.value })} placeholder="Provide image URL or describe enhancement needs..." className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-3 text-text-primary text-sm focus:outline-none focus:border-accent min-h-[120px] resize-y" required data-full-ai-field={fullAIExamples.bind({ current: form.prompt, change: e => setForm({ ...form, prompt: e.target.value }), label: "form.prompt", manual: false, json: false, sample: '' }, "p1-1676", undefined)} />
         </div>
         <div>
           <label className="block text-sm text-text-secondary mb-1.5">Scale Factor</label>
-          <select value={form.scale} onChange={e => setForm({ ...form, scale: e.target.value })} className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent">
+          <select value={form.scale} onChange={e => setForm({ ...form, scale: e.target.value })} className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent" data-full-ai-field={fullAIExamples.bind({ current: form.scale, change: e => setForm({ ...form, scale: e.target.value }), label: "form.scale", manual: false, json: false, sample: '2x' }, "p1-2145", undefined)}>
             <option value="2x">2x</option><option value="4x">4x</option><option value="8x">8x</option>
           </select>
         </div>
         <div>
           <label className="block text-sm text-text-secondary mb-1.5">Denoise Level</label>
-          <select value={form.denoise} onChange={e => setForm({ ...form, denoise: e.target.value })} className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent">
+          <select value={form.denoise} onChange={e => setForm({ ...form, denoise: e.target.value })} className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent" data-full-ai-field={fullAIExamples.bind({ current: form.denoise, change: e => setForm({ ...form, denoise: e.target.value }), label: "form.denoise", manual: false, json: false, sample: 'none' }, "p1-2637", undefined)}>
             <option value="none">none</option><option value="light">light</option><option value="medium">medium</option><option value="heavy">heavy</option>
           </select>
         </div>
         <div>
           <label className="block text-sm text-text-secondary mb-1.5">Face Enhancement</label>
-          <select value={form.faceEnhance} onChange={e => setForm({ ...form, faceEnhance: e.target.value })} className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent">
+          <select value={form.faceEnhance} onChange={e => setForm({ ...form, faceEnhance: e.target.value })} className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent" data-full-ai-field={fullAIExamples.bind({ current: form.faceEnhance, change: e => setForm({ ...form, faceEnhance: e.target.value }), label: "form.faceEnhance", manual: false, json: false, sample: 'off' }, "p1-3190", undefined)}>
             <option value="off">off</option><option value="on">on</option>
           </select>
         </div>

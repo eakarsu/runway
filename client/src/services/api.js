@@ -25,4 +25,13 @@ api.interceptors.response.use(
   }
 );
 
+// Collection endpoints return paginated objects; keep malformed responses out of card grids.
+export function rowsFromResponse(payload) {
+  if (Array.isArray(payload)) return payload;
+  for (const key of ['data', 'rows', 'items']) {
+    if (Array.isArray(payload?.[key])) return payload[key];
+  }
+  return [];
+}
+
 export default api;

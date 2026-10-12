@@ -1,9 +1,13 @@
+
+import FullAIExamples, { useFullAIExamples } from "../../components/FullAIExamples.jsx";
 import { useState } from 'react';
 import { Video, Sparkles, Send } from 'lucide-react';
 import AIResponseDisplay from '../../components/ui/AIResponseDisplay';
 import api from '../../services/api';
 
 export default function TextToVideoPage() {
+  const fullAIExamples = useFullAIExamples();
+
   const [form, setForm] = useState({ prompt: '', duration: '5', style: 'cinematic', resolution: '720p' });
   const [response, setResponse] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -16,7 +20,7 @@ export default function TextToVideoPage() {
     setResponse(null);
     try {
       const res = await api.post('/ai/text-to-video', form);
-      setResponse(res.data?.data || res.data?.result || res.data);
+      setResponse(res.data?.data ?? res.data?.result ?? res.data);
     } catch (err) {
       setError(err.response?.data?.error || 'Something went wrong. Please try again.');
     } finally {
@@ -34,26 +38,26 @@ export default function TextToVideoPage() {
         <p className="text-text-muted mt-1">Generate stunning videos from text descriptions</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-gradient-to-br from-dark-card/80 to-dark-surface/30 border border-dark-border/50 rounded-2xl p-6 space-y-5 backdrop-blur-sm">
+      <form onSubmit={handleSubmit} className="bg-gradient-to-br from-dark-card/80 to-dark-surface/30 border border-dark-border/50 rounded-2xl p-6 space-y-5 backdrop-blur-sm" data-full-ai-workspace="TextToVideoPage"><FullAIExamples controller={fullAIExamples} disabled={Boolean(loading)} />
         <div>
           <label className="block text-sm text-text-secondary mb-1.5">Video Description</label>
-          <textarea value={form.prompt} onChange={e => setForm({ ...form, prompt: e.target.value })} placeholder="Describe the video you want to create..." className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-3 text-text-primary text-sm focus:outline-none focus:border-accent min-h-[120px] resize-y" required />
+          <textarea value={form.prompt} onChange={e => setForm({ ...form, prompt: e.target.value })} placeholder="Describe the video you want to create..." className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-3 text-text-primary text-sm focus:outline-none focus:border-accent min-h-[120px] resize-y" required data-full-ai-field={fullAIExamples.bind({ current: form.prompt, change: e => setForm({ ...form, prompt: e.target.value }), label: "form.prompt", manual: false, json: false, sample: '' }, "p1-1674", undefined)} />
         </div>
         <div>
           <label className="block text-sm text-text-secondary mb-1.5">Duration (seconds)</label>
-          <select value={form.duration} onChange={e => setForm({ ...form, duration: e.target.value })} className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent">
+          <select value={form.duration} onChange={e => setForm({ ...form, duration: e.target.value })} className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent" data-full-ai-field={fullAIExamples.bind({ current: form.duration, change: e => setForm({ ...form, duration: e.target.value }), label: "form.duration", manual: false, json: false, sample: '5' }, "p1-2139", undefined)}>
             <option value="5">5</option><option value="10">10</option><option value="15">15</option><option value="30">30</option>
           </select>
         </div>
         <div>
           <label className="block text-sm text-text-secondary mb-1.5">Style</label>
-          <select value={form.style} onChange={e => setForm({ ...form, style: e.target.value })} className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent">
+          <select value={form.style} onChange={e => setForm({ ...form, style: e.target.value })} className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent" data-full-ai-field={fullAIExamples.bind({ current: form.style, change: e => setForm({ ...form, style: e.target.value }), label: "form.style", manual: false, json: false, sample: 'cinematic' }, "p1-2657", undefined)}>
             <option value="cinematic">cinematic</option><option value="anime">anime</option><option value="realistic">realistic</option><option value="abstract">abstract</option><option value="3d-render">3d-render</option>
           </select>
         </div>
         <div>
           <label className="block text-sm text-text-secondary mb-1.5">Resolution</label>
-          <select value={form.resolution} onChange={e => setForm({ ...form, resolution: e.target.value })} className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent">
+          <select value={form.resolution} onChange={e => setForm({ ...form, resolution: e.target.value })} className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent" data-full-ai-field={fullAIExamples.bind({ current: form.resolution, change: e => setForm({ ...form, resolution: e.target.value }), label: "form.resolution", manual: false, json: false, sample: '720p' }, "p1-3266", undefined)}>
             <option value="720p">720p</option><option value="1080p">1080p</option><option value="4k">4k</option>
           </select>
         </div>

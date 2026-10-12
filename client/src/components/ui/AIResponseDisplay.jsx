@@ -1,6 +1,29 @@
 import { useState, useEffect } from 'react';
 import { CheckCircle, Sparkles, Lightbulb, AlertTriangle, Code, List, ChevronRight } from 'lucide-react';
 
+const labelFor = key => String(key).replace(/([a-z])([A-Z])/g, '$1 $2').replace(/[_-]/g, ' ').replace(/^./, letter => letter.toUpperCase());
+function structuredValue(value) {
+  if (typeof value !== 'string') return value;
+  try { return JSON.parse(value); } catch { return value; }
+}
+
+export function StructuredAIValue({ value }) {
+  const data = structuredValue(value);
+  if (data === null || data === undefined) return <span className="text-text-muted">Not supplied</span>;
+  if (Array.isArray(data)) {
+    if (!data.length) return <span className="text-text-muted">No items returned</span>;
+    const table = data.every(row => row && typeof row === 'object' && !Array.isArray(row))
+      && data.every(row => Object.values(row).every(cell => cell === null || typeof cell !== 'object'));
+    if (table) {
+      const keys = [...new Set(data.flatMap(row => Object.keys(row)))];
+      return <div className="overflow-x-auto rounded-xl border border-dark-border"><table className="w-full text-sm text-left"><thead><tr>{keys.map(key => <th key={key} className="p-3 text-accent-light">{labelFor(key)}</th>)}</tr></thead><tbody>{data.map((row, index) => <tr key={index} className="border-t border-dark-border">{keys.map(key => <td key={key} className="p-3 text-text-secondary"><StructuredAIValue value={row[key]} /></td>)}</tr>)}</tbody></table></div>;
+    }
+    return <ul className="list-disc pl-6 space-y-2">{data.map((item, index) => <li key={index}><StructuredAIValue value={item} /></li>)}</ul>;
+  }
+  if (typeof data === 'object') return <div className="space-y-4">{Object.entries(data).map(([key, item]) => <section key={key} className="rounded-xl border border-dark-border bg-dark-surface/50 p-4"><h3 className="font-semibold text-accent-light mb-2">{labelFor(key)}</h3><StructuredAIValue value={item} /></section>)}</div>;
+  return <span className="text-text-secondary whitespace-pre-wrap">{typeof data === 'boolean' ? String(data) : data === '' ? '""' : String(data)}</span>;
+}
+
 function parseAIResponse(text) {
   if (!text) return [];
   if (typeof text === 'object') {
@@ -146,7 +169,7 @@ export default function AIResponseDisplay({ response, loading }) {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    if (response) setVisible(true);
+    if (response !== null && response !== undefined) setVisible(true);
   }, [response]);
 
   if (loading) {
@@ -165,9 +188,10 @@ export default function AIResponseDisplay({ response, loading }) {
     );
   }
 
-  if (!response) return null;
+  if (response === null || response === undefined) return null;
 
-  const text = typeof response === 'string' ? response : (response.result || response.data || response.content || response.message || JSON.stringify(response, null, 2));
+  const text = typeof response === 'string' ? response : (response.result ?? response.data ?? response.content ?? response.message ?? response);
+  const structured = structuredValue(text);
   const sections = parseAIResponse(text);
 
   return (
@@ -180,7 +204,7 @@ export default function AIResponseDisplay({ response, loading }) {
         <CheckCircle className="w-4 h-4 text-emerald-400 ml-auto" />
       </div>
       <div className="space-y-1">
-        {sections.map((section, i) => (
+        {typeof structured !== 'string' || structured === '' ? <StructuredAIValue value={structured} /> : sections.map((section, i) => (
           <SectionRenderer key={i} section={section} index={i} />
         ))}
       </div>

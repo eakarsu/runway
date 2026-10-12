@@ -1,9 +1,13 @@
+
+import FullAIExamples, { useFullAIExamples } from "../../components/FullAIExamples.jsx";
 import { useState } from 'react';
 import { SunMoon, Sparkles, Send } from 'lucide-react';
 import AIResponseDisplay from '../../components/ui/AIResponseDisplay';
 import api from '../../services/api';
 
 export default function ColorGraderPage() {
+  const fullAIExamples = useFullAIExamples();
+
   const [form, setForm] = useState({ prompt: '', sourceUrl: '', preset: 'cinematic-warm', intensity: 'subtle' });
   const [response, setResponse] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -16,7 +20,7 @@ export default function ColorGraderPage() {
     setResponse(null);
     try {
       const res = await api.post('/ai/color-grader', form);
-      setResponse(res.data?.data || res.data?.result || res.data);
+      setResponse(res.data?.data ?? res.data?.result ?? res.data);
     } catch (err) {
       setError(err.response?.data?.error || 'Something went wrong. Please try again.');
     } finally {
@@ -34,24 +38,24 @@ export default function ColorGraderPage() {
         <p className="text-text-muted mt-1">Apply professional color grading to your footage</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-gradient-to-br from-dark-card/80 to-dark-surface/30 border border-dark-border/50 rounded-2xl p-6 space-y-5 backdrop-blur-sm">
+      <form onSubmit={handleSubmit} className="bg-gradient-to-br from-dark-card/80 to-dark-surface/30 border border-dark-border/50 rounded-2xl p-6 space-y-5 backdrop-blur-sm" data-full-ai-workspace="ColorGraderPage"><FullAIExamples controller={fullAIExamples} disabled={Boolean(loading)} />
         <div>
           <label className="block text-sm text-text-secondary mb-1.5">Grading Description</label>
-          <textarea value={form.prompt} onChange={e => setForm({ ...form, prompt: e.target.value })} placeholder="Describe the color grading look you want..." className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-3 text-text-primary text-sm focus:outline-none focus:border-accent min-h-[120px] resize-y" required />
+          <textarea value={form.prompt} onChange={e => setForm({ ...form, prompt: e.target.value })} placeholder="Describe the color grading look you want..." className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-3 text-text-primary text-sm focus:outline-none focus:border-accent min-h-[120px] resize-y" required data-full-ai-field={fullAIExamples.bind({ current: form.prompt, change: e => setForm({ ...form, prompt: e.target.value }), label: "form.prompt", manual: false, json: false, sample: '' }, "p1-1686", undefined)} />
         </div>
         <div>
           <label className="block text-sm text-text-secondary mb-1.5">Source URL</label>
-          <input type="text" value={form.sourceUrl} onChange={e => setForm({ ...form, sourceUrl: e.target.value })} placeholder="https://example.com/footage.mp4" className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent" />
+          <input type="text" value={form.sourceUrl} onChange={e => setForm({ ...form, sourceUrl: e.target.value })} placeholder="https://example.com/footage.mp4" className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent" data-full-ai-field={fullAIExamples.bind({ current: form.sourceUrl, change: e => setForm({ ...form, sourceUrl: e.target.value }), label: "form.sourceUrl", manual: false, json: false, sample: '' }, "p1-2146", undefined)} />
         </div>
         <div>
           <label className="block text-sm text-text-secondary mb-1.5">Color Preset</label>
-          <select value={form.preset} onChange={e => setForm({ ...form, preset: e.target.value })} className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent">
+          <select value={form.preset} onChange={e => setForm({ ...form, preset: e.target.value })} className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent" data-full-ai-field={fullAIExamples.bind({ current: form.preset, change: e => setForm({ ...form, preset: e.target.value }), label: "form.preset", manual: false, json: false, sample: 'cinematic-warm' }, "p1-2581", undefined)}>
             <option value="cinematic-warm">cinematic-warm</option><option value="cinematic-cool">cinematic-cool</option><option value="vintage">vintage</option><option value="neon">neon</option><option value="noir">noir</option><option value="natural">natural</option>
           </select>
         </div>
         <div>
           <label className="block text-sm text-text-secondary mb-1.5">Intensity</label>
-          <select value={form.intensity} onChange={e => setForm({ ...form, intensity: e.target.value })} className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent">
+          <select value={form.intensity} onChange={e => setForm({ ...form, intensity: e.target.value })} className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent" data-full-ai-field={fullAIExamples.bind({ current: form.intensity, change: e => setForm({ ...form, intensity: e.target.value }), label: "form.intensity", manual: false, json: false, sample: 'subtle' }, "p1-3237", undefined)}>
             <option value="subtle">subtle</option><option value="medium">medium</option><option value="strong">strong</option>
           </select>
         </div>

@@ -1,3 +1,5 @@
+
+import FullAIExamples, { useFullAIExamples } from "../../components/FullAIExamples.jsx";
 import { useState } from 'react';
 import { Share2, Sparkles } from 'lucide-react';
 import AIResponseDisplay from '../../components/ui/AIResponseDisplay';
@@ -6,6 +8,8 @@ import api from '../../services/api';
 const ALL_TARGETS = ['YouTube', 'YouTube Shorts', 'TikTok', 'Instagram Reels', 'Instagram Feed', 'X / Twitter', 'LinkedIn', 'Facebook'];
 
 export default function PlatformExportOptimizerPage() {
+  const fullAIExamples = useFullAIExamples();
+
   const [form, setForm] = useState({
     sourceFormat: '1080p MP4',
     durationSeconds: 60,
@@ -34,7 +38,7 @@ export default function PlatformExportOptimizerPage() {
         durationSeconds: Number(form.durationSeconds) || undefined,
       };
       const res = await api.post('/ai/platform-export-optimizer', payload);
-      setResponse(res.data?.data || res.data?.result || res.data);
+      setResponse(res.data?.data ?? res.data?.result ?? res.data);
     } catch (err) {
       const status = err.response?.status;
       if (status === 503) {
@@ -57,7 +61,7 @@ export default function PlatformExportOptimizerPage() {
         <p className="text-text-muted mt-1">Per-platform export settings and content adaptations</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-gradient-to-br from-dark-card/80 to-dark-surface/30 border border-dark-border/50 rounded-2xl p-6 space-y-5 backdrop-blur-sm">
+      <form onSubmit={handleSubmit} className="bg-gradient-to-br from-dark-card/80 to-dark-surface/30 border border-dark-border/50 rounded-2xl p-6 space-y-5 backdrop-blur-sm" data-full-ai-workspace="PlatformExportOptimizerPage"><FullAIExamples controller={fullAIExamples} disabled={Boolean(loading)} />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm text-text-secondary mb-1.5">Source Format</label>
@@ -65,7 +69,7 @@ export default function PlatformExportOptimizerPage() {
               type="text"
               value={form.sourceFormat}
               onChange={(e) => setForm({ ...form, sourceFormat: e.target.value })}
-              className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent"
+              className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent" data-full-ai-field={fullAIExamples.bind({ current: form.sourceFormat, change: (e) => setForm({ ...form, sourceFormat: e.target.value }), label: "form.sourceFormat", manual: false, json: false, sample: '1080p MP4' }, "p1-2456", undefined)}
             />
           </div>
           <div>
@@ -76,7 +80,7 @@ export default function PlatformExportOptimizerPage() {
               max="36000"
               value={form.durationSeconds}
               onChange={(e) => setForm({ ...form, durationSeconds: e.target.value })}
-              className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent"
+              className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent" data-full-ai-field={fullAIExamples.bind({ current: form.durationSeconds, change: (e) => setForm({ ...form, durationSeconds: e.target.value }), label: "form.durationSeconds", manual: false, json: false, sample: 60 }, "p1-2942", undefined)}
             />
           </div>
         </div>
@@ -86,7 +90,7 @@ export default function PlatformExportOptimizerPage() {
             value={form.contentSummary}
             onChange={(e) => setForm({ ...form, contentSummary: e.target.value })}
             placeholder="Brief description of the video..."
-            className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-3 text-text-primary text-sm focus:outline-none focus:border-accent min-h-[100px] resize-y"
+            className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-3 text-text-primary text-sm focus:outline-none focus:border-accent min-h-[100px] resize-y" data-full-ai-field={fullAIExamples.bind({ current: form.contentSummary, change: (e) => setForm({ ...form, contentSummary: e.target.value }), label: "form.contentSummary", manual: false, json: false, sample: '' }, "p1-3483", undefined)}
           />
         </div>
         <div>

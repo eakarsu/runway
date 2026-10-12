@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BarChart3, Plus, ArrowLeft, FileText, PieChart, TrendingUp } from 'lucide-react';
 import StatusBadge from '../components/ui/StatusBadge';
-import api from '../services/api';
+import api, { rowsFromResponse } from '../services/api';
 
 const reportTypes = [
   { key: 'all', label: 'All Reports' },
@@ -33,9 +33,8 @@ export default function ExportsPage() {
 
   useEffect(() => {
     api.get('/reports').then(r => {
-      const data = r.data?.data || r.data || [];
-      const hasReportData = data.length > 0 && data.some(d => ['variance','board','kpi','custom'].includes(d.type));
-      setItems(hasReportData ? data : mockReports);
+      const data = rowsFromResponse(r.data);
+      setItems(data.length ? data : mockReports);
     }).catch(() => setItems(mockReports)).finally(() => setLoading(false));
   }, []);
 

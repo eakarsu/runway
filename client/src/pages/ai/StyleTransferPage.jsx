@@ -1,9 +1,13 @@
+
+import FullAIExamples, { useFullAIExamples } from "../../components/FullAIExamples.jsx";
 import { useState } from 'react';
 import { Paintbrush, Sparkles, Send } from 'lucide-react';
 import AIResponseDisplay from '../../components/ui/AIResponseDisplay';
 import api from '../../services/api';
 
 export default function StyleTransferPage() {
+  const fullAIExamples = useFullAIExamples();
+
   const [form, setForm] = useState({ prompt: '', sourceUrl: '', style: 'van-gogh', strength: 'light' });
   const [response, setResponse] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -16,7 +20,7 @@ export default function StyleTransferPage() {
     setResponse(null);
     try {
       const res = await api.post('/ai/style-transfer', form);
-      setResponse(res.data?.data || res.data?.result || res.data);
+      setResponse(res.data?.data ?? res.data?.result ?? res.data);
     } catch (err) {
       setError(err.response?.data?.error || 'Something went wrong. Please try again.');
     } finally {
@@ -34,24 +38,24 @@ export default function StyleTransferPage() {
         <p className="text-text-muted mt-1">Apply artistic styles to your images and videos</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-gradient-to-br from-dark-card/80 to-dark-surface/30 border border-dark-border/50 rounded-2xl p-6 space-y-5 backdrop-blur-sm">
+      <form onSubmit={handleSubmit} className="bg-gradient-to-br from-dark-card/80 to-dark-surface/30 border border-dark-border/50 rounded-2xl p-6 space-y-5 backdrop-blur-sm" data-full-ai-workspace="StyleTransferPage"><FullAIExamples controller={fullAIExamples} disabled={Boolean(loading)} />
         <div>
           <label className="block text-sm text-text-secondary mb-1.5">Content Description</label>
-          <textarea value={form.prompt} onChange={e => setForm({ ...form, prompt: e.target.value })} placeholder="Describe the content and target style..." className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-3 text-text-primary text-sm focus:outline-none focus:border-accent min-h-[120px] resize-y" required />
+          <textarea value={form.prompt} onChange={e => setForm({ ...form, prompt: e.target.value })} placeholder="Describe the content and target style..." className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-3 text-text-primary text-sm focus:outline-none focus:border-accent min-h-[120px] resize-y" required data-full-ai-field={fullAIExamples.bind({ current: form.prompt, change: e => setForm({ ...form, prompt: e.target.value }), label: "form.prompt", manual: false, json: false, sample: '' }, "p1-1688", undefined)} />
         </div>
         <div>
           <label className="block text-sm text-text-secondary mb-1.5">Source URL</label>
-          <input type="text" value={form.sourceUrl} onChange={e => setForm({ ...form, sourceUrl: e.target.value })} placeholder="https://example.com/source.jpg" className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent" />
+          <input type="text" value={form.sourceUrl} onChange={e => setForm({ ...form, sourceUrl: e.target.value })} placeholder="https://example.com/source.jpg" className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent" data-full-ai-field={fullAIExamples.bind({ current: form.sourceUrl, change: e => setForm({ ...form, sourceUrl: e.target.value }), label: "form.sourceUrl", manual: false, json: false, sample: '' }, "p1-2145", undefined)} />
         </div>
         <div>
           <label className="block text-sm text-text-secondary mb-1.5">Target Style</label>
-          <select value={form.style} onChange={e => setForm({ ...form, style: e.target.value })} className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent">
+          <select value={form.style} onChange={e => setForm({ ...form, style: e.target.value })} className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent" data-full-ai-field={fullAIExamples.bind({ current: form.style, change: e => setForm({ ...form, style: e.target.value }), label: "form.style", manual: false, json: false, sample: 'van-gogh' }, "p1-2579", undefined)}>
             <option value="van-gogh">van-gogh</option><option value="picasso">picasso</option><option value="monet">monet</option><option value="pop-art">pop-art</option><option value="cyberpunk">cyberpunk</option><option value="studio-ghibli">studio-ghibli</option>
           </select>
         </div>
         <div>
           <label className="block text-sm text-text-secondary mb-1.5">Style Strength</label>
-          <select value={form.strength} onChange={e => setForm({ ...form, strength: e.target.value })} className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent">
+          <select value={form.strength} onChange={e => setForm({ ...form, strength: e.target.value })} className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent" data-full-ai-field={fullAIExamples.bind({ current: form.strength, change: e => setForm({ ...form, strength: e.target.value }), label: "form.strength", manual: false, json: false, sample: 'light' }, "p1-3236", undefined)}>
             <option value="light">light</option><option value="medium">medium</option><option value="strong">strong</option>
           </select>
         </div>

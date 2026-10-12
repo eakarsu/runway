@@ -1,9 +1,13 @@
+
+import FullAIExamples, { useFullAIExamples } from "../../components/FullAIExamples.jsx";
 import { useState } from 'react';
 import { ImagePlus, Sparkles, Send } from 'lucide-react';
 import AIResponseDisplay from '../../components/ui/AIResponseDisplay';
 import api from '../../services/api';
 
 export default function TextToImagePage() {
+  const fullAIExamples = useFullAIExamples();
+
   const [form, setForm] = useState({ prompt: '', style: 'photorealistic', aspectRatio: '1:1', quality: 'standard' });
   const [response, setResponse] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -16,7 +20,7 @@ export default function TextToImagePage() {
     setResponse(null);
     try {
       const res = await api.post('/ai/text-to-image', form);
-      setResponse(res.data?.data || res.data?.result || res.data);
+      setResponse(res.data?.data ?? res.data?.result ?? res.data);
     } catch (err) {
       setError(err.response?.data?.error || 'Something went wrong. Please try again.');
     } finally {
@@ -34,26 +38,26 @@ export default function TextToImagePage() {
         <p className="text-text-muted mt-1">Create beautiful images from text prompts</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-gradient-to-br from-dark-card/80 to-dark-surface/30 border border-dark-border/50 rounded-2xl p-6 space-y-5 backdrop-blur-sm">
+      <form onSubmit={handleSubmit} className="bg-gradient-to-br from-dark-card/80 to-dark-surface/30 border border-dark-border/50 rounded-2xl p-6 space-y-5 backdrop-blur-sm" data-full-ai-workspace="TextToImagePage"><FullAIExamples controller={fullAIExamples} disabled={Boolean(loading)} />
         <div>
           <label className="block text-sm text-text-secondary mb-1.5">Image Description</label>
-          <textarea value={form.prompt} onChange={e => setForm({ ...form, prompt: e.target.value })} placeholder="Describe the image you want to create..." className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-3 text-text-primary text-sm focus:outline-none focus:border-accent min-h-[120px] resize-y" required />
+          <textarea value={form.prompt} onChange={e => setForm({ ...form, prompt: e.target.value })} placeholder="Describe the image you want to create..." className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-3 text-text-primary text-sm focus:outline-none focus:border-accent min-h-[120px] resize-y" required data-full-ai-field={fullAIExamples.bind({ current: form.prompt, change: e => setForm({ ...form, prompt: e.target.value }), label: "form.prompt", manual: false, json: false, sample: '' }, "p1-1687", undefined)} />
         </div>
         <div>
           <label className="block text-sm text-text-secondary mb-1.5">Style</label>
-          <select value={form.style} onChange={e => setForm({ ...form, style: e.target.value })} className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent">
+          <select value={form.style} onChange={e => setForm({ ...form, style: e.target.value })} className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent" data-full-ai-field={fullAIExamples.bind({ current: form.style, change: e => setForm({ ...form, style: e.target.value }), label: "form.style", manual: false, json: false, sample: 'photorealistic' }, "p1-2139", undefined)}>
             <option value="photorealistic">photorealistic</option><option value="digital-art">digital-art</option><option value="oil-painting">oil-painting</option><option value="watercolor">watercolor</option><option value="sketch">sketch</option>
           </select>
         </div>
         <div>
           <label className="block text-sm text-text-secondary mb-1.5">Aspect Ratio</label>
-          <select value={form.aspectRatio} onChange={e => setForm({ ...form, aspectRatio: e.target.value })} className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent">
+          <select value={form.aspectRatio} onChange={e => setForm({ ...form, aspectRatio: e.target.value })} className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent" data-full-ai-field={fullAIExamples.bind({ current: form.aspectRatio, change: e => setForm({ ...form, aspectRatio: e.target.value }), label: "form.aspectRatio", manual: false, json: false, sample: '1:1' }, "p1-2776", undefined)}>
             <option value="1:1">1:1</option><option value="16:9">16:9</option><option value="9:16">9:16</option><option value="4:3">4:3</option>
           </select>
         </div>
         <div>
           <label className="block text-sm text-text-secondary mb-1.5">Quality</label>
-          <select value={form.quality} onChange={e => setForm({ ...form, quality: e.target.value })} className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent">
+          <select value={form.quality} onChange={e => setForm({ ...form, quality: e.target.value })} className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent" data-full-ai-field={fullAIExamples.bind({ current: form.quality, change: e => setForm({ ...form, quality: e.target.value }), label: "form.quality", manual: false, json: false, sample: 'standard' }, "p1-3316", undefined)}>
             <option value="standard">standard</option><option value="high">high</option><option value="ultra">ultra</option>
           </select>
         </div>

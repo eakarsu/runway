@@ -1,9 +1,13 @@
+
+import FullAIExamples, { useFullAIExamples } from "../../components/FullAIExamples.jsx";
 import { useState } from 'react';
 import { Move, Sparkles, Send } from 'lucide-react';
 import AIResponseDisplay from '../../components/ui/AIResponseDisplay';
 import api from '../../services/api';
 
 export default function MotionTrackerPage() {
+  const fullAIExamples = useFullAIExamples();
+
   const [form, setForm] = useState({ prompt: '', videoUrl: '', trackingType: 'object', outputFormat: 'overlay' });
   const [response, setResponse] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -16,7 +20,7 @@ export default function MotionTrackerPage() {
     setResponse(null);
     try {
       const res = await api.post('/ai/motion-tracker', form);
-      setResponse(res.data?.data || res.data?.result || res.data);
+      setResponse(res.data?.data ?? res.data?.result ?? res.data);
     } catch (err) {
       setError(err.response?.data?.error || 'Something went wrong. Please try again.');
     } finally {
@@ -34,24 +38,24 @@ export default function MotionTrackerPage() {
         <p className="text-text-muted mt-1">Track motion and objects in video footage</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-gradient-to-br from-dark-card/80 to-dark-surface/30 border border-dark-border/50 rounded-2xl p-6 space-y-5 backdrop-blur-sm">
+      <form onSubmit={handleSubmit} className="bg-gradient-to-br from-dark-card/80 to-dark-surface/30 border border-dark-border/50 rounded-2xl p-6 space-y-5 backdrop-blur-sm" data-full-ai-workspace="MotionTrackerPage"><FullAIExamples controller={fullAIExamples} disabled={Boolean(loading)} />
         <div>
           <label className="block text-sm text-text-secondary mb-1.5">Tracking Description</label>
-          <textarea value={form.prompt} onChange={e => setForm({ ...form, prompt: e.target.value })} placeholder="Describe what you want to track in the video..." className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-3 text-text-primary text-sm focus:outline-none focus:border-accent min-h-[120px] resize-y" required />
+          <textarea value={form.prompt} onChange={e => setForm({ ...form, prompt: e.target.value })} placeholder="Describe what you want to track in the video..." className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-3 text-text-primary text-sm focus:outline-none focus:border-accent min-h-[120px] resize-y" required data-full-ai-field={fullAIExamples.bind({ current: form.prompt, change: e => setForm({ ...form, prompt: e.target.value }), label: "form.prompt", manual: false, json: false, sample: '' }, "p1-1681", undefined)} />
         </div>
         <div>
           <label className="block text-sm text-text-secondary mb-1.5">Video URL</label>
-          <input type="text" value={form.videoUrl} onChange={e => setForm({ ...form, videoUrl: e.target.value })} placeholder="https://example.com/video.mp4" className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent" />
+          <input type="text" value={form.videoUrl} onChange={e => setForm({ ...form, videoUrl: e.target.value })} placeholder="https://example.com/video.mp4" className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent" data-full-ai-field={fullAIExamples.bind({ current: form.videoUrl, change: e => setForm({ ...form, videoUrl: e.target.value }), label: "form.videoUrl", manual: false, json: false, sample: '' }, "p1-2144", undefined)} />
         </div>
         <div>
           <label className="block text-sm text-text-secondary mb-1.5">Tracking Type</label>
-          <select value={form.trackingType} onChange={e => setForm({ ...form, trackingType: e.target.value })} className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent">
+          <select value={form.trackingType} onChange={e => setForm({ ...form, trackingType: e.target.value })} className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent" data-full-ai-field={fullAIExamples.bind({ current: form.trackingType, change: e => setForm({ ...form, trackingType: e.target.value }), label: "form.trackingType", manual: false, json: false, sample: 'object' }, "p1-2576", undefined)}>
             <option value="object">object</option><option value="face">face</option><option value="point">point</option><option value="camera-motion">camera-motion</option>
           </select>
         </div>
         <div>
           <label className="block text-sm text-text-secondary mb-1.5">Output</label>
-          <select value={form.outputFormat} onChange={e => setForm({ ...form, outputFormat: e.target.value })} className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent">
+          <select value={form.outputFormat} onChange={e => setForm({ ...form, outputFormat: e.target.value })} className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent" data-full-ai-field={fullAIExamples.bind({ current: form.outputFormat, change: e => setForm({ ...form, outputFormat: e.target.value }), label: "form.outputFormat", manual: false, json: false, sample: 'overlay' }, "p1-3145", undefined)}>
             <option value="overlay">overlay</option><option value="data">data</option><option value="stabilized">stabilized</option>
           </select>
         </div>

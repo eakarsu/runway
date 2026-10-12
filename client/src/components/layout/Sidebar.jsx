@@ -91,7 +91,7 @@ export default function Sidebar() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto px-3 py-2 space-y-0.5">
+      <nav className="flex-1 overflow-y-auto px-3 py-2 space-y-0.5">{import.meta.env.VITE_NATIVE_AI_WORKSPACE_URL && <a href={import.meta.env.VITE_NATIVE_AI_WORKSPACE_URL} target="_blank" rel="noopener" className="sidebar-link">AI workspace</a>}
         <SectionLabel>Overview</SectionLabel>
         {overviewNav.map((item) => <NavItem key={item.path} {...item} />)}
 

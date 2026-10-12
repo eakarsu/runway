@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import api from '../services/api';
 import { Zap, Mail, Lock, LogIn, Video, Image, Mic, Wand2 } from 'lucide-react';
 
 export default function LoginPage() {
@@ -8,6 +9,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [demoLoading, setDemoLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -94,11 +96,12 @@ export default function LoginPage() {
             </div>
             <button
               type="button"
-              onClick={async () => { const { data } = await import('../services/api').then(({ default: api }) => api.get('/auth/demo-credentials')); setEmail(data.email || ''); setPassword(data.password || ''); }}
-              aria-label="Auto Fill Demo Credentials"
+              onClick={async () => { setDemoLoading(true); setError(''); try { const { data } = await api.get('/auth/demo-credentials'); if (!data.email || !data.password) throw new Error('Configured demo credentials are unavailable'); setEmail(data.email); setPassword(data.password); } catch (err) { setError(err.response?.data?.error || err.message || 'Demo credentials are unavailable'); } finally { setDemoLoading(false); } }}
+              disabled={loading || demoLoading}
+              aria-label="Fill demo credentials"
               style={{ width: '100%', marginBottom: '12px', padding: '10px 14px', borderRadius: '8px', border: '1px solid currentColor', background: 'transparent', cursor: 'pointer' }}
             >
-              Auto Fill Demo Credentials
+              {demoLoading ? 'Loading demo credentials…' : 'Fill demo credentials'}
             </button>
             <button
               type="submit"

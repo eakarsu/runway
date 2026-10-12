@@ -95,6 +95,8 @@ for assigned_port in "$BACKEND_PORT" "$FRONTEND_PORT";do [[ "$assigned_port" =~ 
 [ -d "$PROJECT_DIR/client/node_modules" ]&&[ -d "$PROJECT_DIR/runtime" ]||{ echo "Runtime dependencies are missing" >&2;exit 1; }
 export RUNTIME_PROJECT_NAME=runway RUNTIME_AI_ENDPOINT=/api/ai/creative-production-review RUNTIME_AI_FEATURE=creative-production-review
 export RUNTIME_AI_SYSTEM_PROMPT='You are a governed creative-production assistant. Review project sources, asset rights, edit intent, version history, review notes, provider evidence, export constraints, approval status, and explicit human release gates.'
+echo "AI workspace: http://127.0.0.1:$BACKEND_PORT/ai-workspace"
+export VITE_NATIVE_AI_WORKSPACE_URL="http://127.0.0.1:$BACKEND_PORT/ai-workspace" REACT_APP_NATIVE_AI_WORKSPACE_URL="http://127.0.0.1:$BACKEND_PORT/ai-workspace"
 node "$PROJECT_DIR/runtime/setup.mjs"
 export VITE_API_URL=/api
 (cd "$PROJECT_DIR/client" && npm run build)

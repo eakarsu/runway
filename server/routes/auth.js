@@ -24,6 +24,18 @@ const strongPassword = (value) => value.length >= 12
   && /[^A-Za-z0-9]/.test(value);
 const publicUser = (user) => ({ id: user.id, email: user.email, name: user.name });
 
+router.get('/demo-credentials', (req, res) => {
+  if (process.env.NODE_ENV === 'production' || process.env.ENABLE_DEMO_CREDENTIAL_AUTOFILL !== 'true') {
+    return res.status(404).json({ error: 'Demo credential autofill is not enabled for this local environment' });
+  }
+  const pairs = ['DEMO', 'SEED_ADMIN', 'ADMIN', 'DEFAULT'];
+  const pair = pairs.map(prefix => ({ email: process.env[`${prefix}_EMAIL`], password: process.env[`${prefix}_PASSWORD`] }))
+    .find(({ email, password }) => email && password);
+  if (!pair) return res.status(404).json({ error: 'No configured demo account credentials are available' });
+  res.set('Cache-Control', 'no-store');
+  return res.json(pair);
+});
+
 router.post('/register', checkLoginRate, async (req, res) => {
   try {
     if (process.env.ALLOW_PUBLIC_REGISTRATION !== 'true') return res.status(403).json({ error: 'Public registration is disabled', code: 'REGISTRATION_DISABLED' });

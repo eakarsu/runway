@@ -1,9 +1,13 @@
+
+import FullAIExamples, { useFullAIExamples } from "../../components/FullAIExamples.jsx";
 import { useState } from 'react';
 import { Film, Sparkles } from 'lucide-react';
 import AIResponseDisplay from '../../components/ui/AIResponseDisplay';
 import api from '../../services/api';
 
 export default function SceneTransitionPage() {
+  const fullAIExamples = useFullAIExamples();
+
   const [form, setForm] = useState({
     sceneOutline: '',
     pacingGoal: 'cinematic',
@@ -20,7 +24,7 @@ export default function SceneTransitionPage() {
     setResponse(null);
     try {
       const res = await api.post('/ai/scene-transition-suggester', form);
-      setResponse(res.data?.data || res.data?.result || res.data);
+      setResponse(res.data?.data ?? res.data?.result ?? res.data);
     } catch (err) {
       setError(err.response?.data?.error || 'Something went wrong. Please try again.');
     } finally {
@@ -38,7 +42,7 @@ export default function SceneTransitionPage() {
         <p className="text-text-muted mt-1">Improve pacing with AI-suggested scene transitions</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-gradient-to-br from-dark-card/80 to-dark-surface/30 border border-dark-border/50 rounded-2xl p-6 space-y-5 backdrop-blur-sm">
+      <form onSubmit={handleSubmit} className="bg-gradient-to-br from-dark-card/80 to-dark-surface/30 border border-dark-border/50 rounded-2xl p-6 space-y-5 backdrop-blur-sm" data-full-ai-workspace="SceneTransitionPage"><FullAIExamples controller={fullAIExamples} disabled={Boolean(loading)} />
         <div>
           <label className="block text-sm text-text-secondary mb-1.5">Scene Outline</label>
           <textarea
@@ -46,13 +50,13 @@ export default function SceneTransitionPage() {
             onChange={(e) => setForm({ ...form, sceneOutline: e.target.value })}
             placeholder="List your scenes in order, one per line, with brief descriptions..."
             className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-3 text-text-primary text-sm focus:outline-none focus:border-accent min-h-[160px] resize-y"
-            required
+            required data-full-ai-field={fullAIExamples.bind({ current: form.sceneOutline, change: (e) => setForm({ ...form, sceneOutline: e.target.value }), label: "form.sceneOutline", manual: false, json: false, sample: '' }, "p1-1713", undefined)}
           />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm text-text-secondary mb-1.5">Pacing Goal</label>
-            <select value={form.pacingGoal} onChange={(e) => setForm({ ...form, pacingGoal: e.target.value })} className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent">
+            <select value={form.pacingGoal} onChange={(e) => setForm({ ...form, pacingGoal: e.target.value })} className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent" data-full-ai-field={fullAIExamples.bind({ current: form.pacingGoal, change: (e) => setForm({ ...form, pacingGoal: e.target.value }), label: "form.pacingGoal", manual: false, json: false, sample: 'cinematic' }, "p1-2352", undefined)}>
               <option value="cinematic">cinematic</option>
               <option value="fast-cut">fast-cut</option>
               <option value="documentary">documentary</option>
@@ -62,7 +66,7 @@ export default function SceneTransitionPage() {
           </div>
           <div>
             <label className="block text-sm text-text-secondary mb-1.5">Target Platform</label>
-            <select value={form.targetPlatform} onChange={(e) => setForm({ ...form, targetPlatform: e.target.value })} className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent">
+            <select value={form.targetPlatform} onChange={(e) => setForm({ ...form, targetPlatform: e.target.value })} className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent" data-full-ai-field={fullAIExamples.bind({ current: form.targetPlatform, change: (e) => setForm({ ...form, targetPlatform: e.target.value }), label: "form.targetPlatform", manual: false, json: false, sample: 'youtube' }, "p1-3062", undefined)}>
               <option value="youtube">YouTube</option>
               <option value="tiktok">TikTok</option>
               <option value="instagram">Instagram</option>

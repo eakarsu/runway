@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FileText, Plus, Search } from 'lucide-react';
 import StatusBadge from '../components/ui/StatusBadge';
-import api from '../services/api';
+import api, { rowsFromResponse } from '../services/api';
 
 export default function ScriptsPage() {
   const [items, setItems] = useState([]);
@@ -11,7 +11,7 @@ export default function ScriptsPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    api.get('/scripts').then(r => setItems(r.data?.data || r.data || [])).catch(() => setItems([])).finally(() => setLoading(false));
+    api.get('/scripts').then(r => setItems(rowsFromResponse(r.data))).catch(() => setItems([])).finally(() => setLoading(false));
   }, []);
 
   const filtered = items.filter(i => (i.name || i.title || i.prompt || '').toLowerCase().includes(search.toLowerCase()));

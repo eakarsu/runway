@@ -1,9 +1,13 @@
+
+import FullAIExamples, { useFullAIExamples } from "../../components/FullAIExamples.jsx";
 import { useState } from 'react';
 import { Eye, Sparkles, Send } from 'lucide-react';
 import AIResponseDisplay from '../../components/ui/AIResponseDisplay';
 import api from '../../services/api';
 
 export default function SceneAnalyzerPage() {
+  const fullAIExamples = useFullAIExamples();
+
   const [form, setForm] = useState({ prompt: '', analysisType: 'full', detail: 'basic' });
   const [response, setResponse] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -16,7 +20,7 @@ export default function SceneAnalyzerPage() {
     setResponse(null);
     try {
       const res = await api.post('/ai/scene-analyzer', form);
-      setResponse(res.data?.data || res.data?.result || res.data);
+      setResponse(res.data?.data ?? res.data?.result ?? res.data);
     } catch (err) {
       setError(err.response?.data?.error || 'Something went wrong. Please try again.');
     } finally {
@@ -34,20 +38,20 @@ export default function SceneAnalyzerPage() {
         <p className="text-text-muted mt-1">Analyze scenes for composition, lighting, and mood</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-gradient-to-br from-dark-card/80 to-dark-surface/30 border border-dark-border/50 rounded-2xl p-6 space-y-5 backdrop-blur-sm">
+      <form onSubmit={handleSubmit} className="bg-gradient-to-br from-dark-card/80 to-dark-surface/30 border border-dark-border/50 rounded-2xl p-6 space-y-5 backdrop-blur-sm" data-full-ai-workspace="SceneAnalyzerPage"><FullAIExamples controller={fullAIExamples} disabled={Boolean(loading)} />
         <div>
           <label className="block text-sm text-text-secondary mb-1.5">Scene URL or Description</label>
-          <textarea value={form.prompt} onChange={e => setForm({ ...form, prompt: e.target.value })} placeholder="Provide an image/video URL or describe the scene to analyze..." className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-3 text-text-primary text-sm focus:outline-none focus:border-accent min-h-[120px] resize-y" required />
+          <textarea value={form.prompt} onChange={e => setForm({ ...form, prompt: e.target.value })} placeholder="Provide an image/video URL or describe the scene to analyze..." className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-3 text-text-primary text-sm focus:outline-none focus:border-accent min-h-[120px] resize-y" required data-full-ai-field={fullAIExamples.bind({ current: form.prompt, change: e => setForm({ ...form, prompt: e.target.value }), label: "form.prompt", manual: false, json: false, sample: '' }, "p1-1668", undefined)} />
         </div>
         <div>
           <label className="block text-sm text-text-secondary mb-1.5">Analysis Type</label>
-          <select value={form.analysisType} onChange={e => setForm({ ...form, analysisType: e.target.value })} className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent">
+          <select value={form.analysisType} onChange={e => setForm({ ...form, analysisType: e.target.value })} className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent" data-full-ai-field={fullAIExamples.bind({ current: form.analysisType, change: e => setForm({ ...form, analysisType: e.target.value }), label: "form.analysisType", manual: false, json: false, sample: 'full' }, "p1-2150", undefined)}>
             <option value="full">full</option><option value="composition">composition</option><option value="lighting">lighting</option><option value="color">color</option><option value="mood">mood</option><option value="objects">objects</option>
           </select>
         </div>
         <div>
           <label className="block text-sm text-text-secondary mb-1.5">Detail Level</label>
-          <select value={form.detail} onChange={e => setForm({ ...form, detail: e.target.value })} className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent">
+          <select value={form.detail} onChange={e => setForm({ ...form, detail: e.target.value })} className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent" data-full-ai-field={fullAIExamples.bind({ current: form.detail, change: e => setForm({ ...form, detail: e.target.value }), label: "form.detail", manual: false, json: false, sample: 'basic' }, "p1-2799", undefined)}>
             <option value="basic">basic</option><option value="detailed">detailed</option><option value="expert">expert</option>
           </select>
         </div>

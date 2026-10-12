@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Table, Upload, FileSpreadsheet, Plus, X, Save, Download, Trash2, Play, ChevronDown, ChevronUp, Search, BarChart3, ArrowUpDown, EyeOff, Check, PieChart, TrendingUp, Hash, Type, Calendar, MessageSquare, Palette, GitBranch, Clock, FileText, Printer, Zap, ArrowLeft } from 'lucide-react';
 import { downloadSpreadsheet, readSpreadsheet } from '../services/spreadsheetFile';
-import api from '../services/api';
+import api, { rowsFromResponse } from '../services/api';
 import { FORMULAS, STANDALONE, evalFormula, round2, _nums, _sum } from '../utils/formulaEngine';
 
 
@@ -232,7 +232,7 @@ export default function SpreadsheetsPage() {
   const [setupError, setSetupError] = useState('');
 
   useEffect(() => {
-    api.get('/spreadsheets').then(r => setSaved(r.data?.data || r.data || [])).catch(() => []);
+    api.get('/spreadsheets').then(r => setSaved(rowsFromResponse(r.data))).catch(() => []);
   }, []);
 
   // Load spreadsheet from dashboard navigation
@@ -338,7 +338,7 @@ export default function SpreadsheetsPage() {
     setSaving(true);
     try {
       await api.post('/spreadsheets/upload', { name: fileName || 'Untitled', data, columns, variables, fileName, fileSize: 0, template: 'custom' });
-      const r = await api.get('/spreadsheets'); setSaved(r.data?.data || r.data || []);
+      const r = await api.get('/spreadsheets'); setSaved(rowsFromResponse(r.data));
     } catch { /* Best-effort prototype UI action. */ } setSaving(false);
   };
 

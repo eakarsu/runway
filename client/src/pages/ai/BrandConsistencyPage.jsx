@@ -1,9 +1,13 @@
+
+import FullAIExamples, { useFullAIExamples } from "../../components/FullAIExamples.jsx";
 import { useState } from 'react';
 import { ShieldCheck, Sparkles } from 'lucide-react';
 import AIResponseDisplay from '../../components/ui/AIResponseDisplay';
 import api from '../../services/api';
 
 export default function BrandConsistencyPage() {
+  const fullAIExamples = useFullAIExamples();
+
   const [form, setForm] = useState({
     brandRules: '',
     content: '',
@@ -20,7 +24,7 @@ export default function BrandConsistencyPage() {
     setResponse(null);
     try {
       const res = await api.post('/ai/brand-consistency', form);
-      setResponse(res.data?.result || res.data);
+      setResponse(res.data?.result ?? res.data);
     } catch (err) {
       const status = err.response?.status;
       if (status === 503) {
@@ -43,7 +47,7 @@ export default function BrandConsistencyPage() {
         <p className="text-text-muted mt-1">Check content against your brand rules</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-gradient-to-br from-dark-card/80 to-dark-surface/30 border border-dark-border/50 rounded-2xl p-6 space-y-5">
+      <form onSubmit={handleSubmit} className="bg-gradient-to-br from-dark-card/80 to-dark-surface/30 border border-dark-border/50 rounded-2xl p-6 space-y-5" data-full-ai-workspace="BrandConsistencyPage"><FullAIExamples controller={fullAIExamples} disabled={Boolean(loading)} />
         <div>
           <label className="block text-sm text-text-secondary mb-1.5">Brand Rules</label>
           <textarea
@@ -51,7 +55,7 @@ export default function BrandConsistencyPage() {
             onChange={(e) => setForm({ ...form, brandRules: e.target.value })}
             placeholder="e.g. Voice: warm, witty. Avoid jargon. Always show logo on intro."
             className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-3 text-text-primary text-sm focus:outline-none focus:border-accent min-h-[120px] resize-y"
-            required
+            required data-full-ai-field={fullAIExamples.bind({ current: form.brandRules, change: (e) => setForm({ ...form, brandRules: e.target.value }), label: "form.brandRules", manual: false, json: false, sample: '' }, "p1-1817", undefined)}
           />
         </div>
         <div>
@@ -60,7 +64,7 @@ export default function BrandConsistencyPage() {
             type="text"
             value={form.contentType}
             onChange={(e) => setForm({ ...form, contentType: e.target.value })}
-            className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent"
+            className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent" data-full-ai-field={fullAIExamples.bind({ current: form.contentType, change: (e) => setForm({ ...form, contentType: e.target.value }), label: "form.contentType", manual: false, json: false, sample: 'video-script' }, "p1-2381", undefined)}
           />
         </div>
         <div>
@@ -70,7 +74,7 @@ export default function BrandConsistencyPage() {
             onChange={(e) => setForm({ ...form, content: e.target.value })}
             placeholder="Paste the script / caption / copy to review"
             className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-3 text-text-primary text-sm focus:outline-none focus:border-accent min-h-[160px] resize-y"
-            required
+            required data-full-ai-field={fullAIExamples.bind({ current: form.content, change: (e) => setForm({ ...form, content: e.target.value }), label: "form.content", manual: false, json: false, sample: '' }, "p1-2829", undefined)}
           />
         </div>
 

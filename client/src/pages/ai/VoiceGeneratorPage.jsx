@@ -1,9 +1,13 @@
+
+import FullAIExamples, { useFullAIExamples } from "../../components/FullAIExamples.jsx";
 import { useState } from 'react';
 import { AudioLines, Sparkles, Send } from 'lucide-react';
 import AIResponseDisplay from '../../components/ui/AIResponseDisplay';
 import api from '../../services/api';
 
 export default function VoiceGeneratorPage() {
+  const fullAIExamples = useFullAIExamples();
+
   const [form, setForm] = useState({ prompt: '', voice: 'male-deep', language: 'en-US', speed: 'slow' });
   const [response, setResponse] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -16,7 +20,7 @@ export default function VoiceGeneratorPage() {
     setResponse(null);
     try {
       const res = await api.post('/ai/voice-generator', form);
-      setResponse(res.data?.data || res.data?.result || res.data);
+      setResponse(res.data?.data ?? res.data?.result ?? res.data);
     } catch (err) {
       setError(err.response?.data?.error || 'Something went wrong. Please try again.');
     } finally {
@@ -34,26 +38,26 @@ export default function VoiceGeneratorPage() {
         <p className="text-text-muted mt-1">Generate natural-sounding voiceovers with AI</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-gradient-to-br from-dark-card/80 to-dark-surface/30 border border-dark-border/50 rounded-2xl p-6 space-y-5 backdrop-blur-sm">
+      <form onSubmit={handleSubmit} className="bg-gradient-to-br from-dark-card/80 to-dark-surface/30 border border-dark-border/50 rounded-2xl p-6 space-y-5 backdrop-blur-sm" data-full-ai-workspace="VoiceGeneratorPage"><FullAIExamples controller={fullAIExamples} disabled={Boolean(loading)} />
         <div>
           <label className="block text-sm text-text-secondary mb-1.5">Script / Text</label>
-          <textarea value={form.prompt} onChange={e => setForm({ ...form, prompt: e.target.value })} placeholder="Enter the text to convert to speech..." className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-3 text-text-primary text-sm focus:outline-none focus:border-accent min-h-[120px] resize-y" required />
+          <textarea value={form.prompt} onChange={e => setForm({ ...form, prompt: e.target.value })} placeholder="Enter the text to convert to speech..." className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-3 text-text-primary text-sm focus:outline-none focus:border-accent min-h-[120px] resize-y" required data-full-ai-field={fullAIExamples.bind({ current: form.prompt, change: e => setForm({ ...form, prompt: e.target.value }), label: "form.prompt", manual: false, json: false, sample: '' }, "p1-1683", undefined)} />
         </div>
         <div>
           <label className="block text-sm text-text-secondary mb-1.5">Voice</label>
-          <select value={form.voice} onChange={e => setForm({ ...form, voice: e.target.value })} className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent">
+          <select value={form.voice} onChange={e => setForm({ ...form, voice: e.target.value })} className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent" data-full-ai-field={fullAIExamples.bind({ current: form.voice, change: e => setForm({ ...form, voice: e.target.value }), label: "form.voice", manual: false, json: false, sample: 'male-deep' }, "p1-2133", undefined)}>
             <option value="male-deep">male-deep</option><option value="male-neutral">male-neutral</option><option value="female-warm">female-warm</option><option value="female-professional">female-professional</option><option value="child">child</option>
           </select>
         </div>
         <div>
           <label className="block text-sm text-text-secondary mb-1.5">Language</label>
-          <select value={form.language} onChange={e => setForm({ ...form, language: e.target.value })} className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent">
+          <select value={form.language} onChange={e => setForm({ ...form, language: e.target.value })} className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent" data-full-ai-field={fullAIExamples.bind({ current: form.language, change: e => setForm({ ...form, language: e.target.value }), label: "form.language", manual: false, json: false, sample: 'en-US' }, "p1-2772", undefined)}>
             <option value="en-US">en-US</option><option value="en-GB">en-GB</option><option value="es-ES">es-ES</option><option value="fr-FR">fr-FR</option><option value="de-DE">de-DE</option><option value="ja-JP">ja-JP</option>
           </select>
         </div>
         <div>
           <label className="block text-sm text-text-secondary mb-1.5">Speed</label>
-          <select value={form.speed} onChange={e => setForm({ ...form, speed: e.target.value })} className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent">
+          <select value={form.speed} onChange={e => setForm({ ...form, speed: e.target.value })} className="w-full bg-dark-bg/60 border border-dark-border/60 rounded-xl px-4 py-2.5 text-text-primary text-sm focus:outline-none focus:border-accent" data-full-ai-field={fullAIExamples.bind({ current: form.speed, change: e => setForm({ ...form, speed: e.target.value }), label: "form.speed", manual: false, json: false, sample: 'slow' }, "p1-3388", undefined)}>
             <option value="slow">slow</option><option value="normal">normal</option><option value="fast">fast</option>
           </select>
         </div>
